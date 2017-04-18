@@ -38,7 +38,7 @@ def tdmsfunc1(path,filename):
 #    print 'filename is',filename
     return datamean, datastd
 
-def tdmsfuncapr14(path,filename):
+def tdmsfuncapr14(filename):
     # Accepts a filename and path. Opens TDMS file and extracts 4 columns of data, as per April 14 tests.
     # Load the file    
     tdms_file = TdmsFile(filename)
@@ -48,19 +48,25 @@ def tdmsfuncapr14(path,filename):
     channel3 = tdms_file.object('Untitled','10khz')
     channel4 = tdms_file.object('Untitled','1khz')
 #    time= tdms_file.object('Untitled','Time*')    
-#    data = channel.data
-#    time = channel.time_track()
-    datamean = np.mean(data)
-    datastd = np.std(data)
+    c1 = channel1.data
+    c2 = channel2.data
+    c3 = channel3.data
+    c4 = channel4.data
+    
+    mean1 = np.mean(c1)
+    mean2 = np.mean(c2)
+    mean3 = np.mean(c3)
+    mean4 = np.mean(c4)
+    
 #    print 'mean of data is',average
 #    print 'distance is', distance,'mm'
 #    print 'filename is',filename
-    return datamean, datastd
+    return mean1,mean2,mean3,mean4
 
 def exportresults(filename,data):
 #    file_exists = os.path.isfile(filename)
     with open(filename,'ab') as csvfile:
-        logwriter = csv.writer(csvfile,delimiter=',',quotechar='|',quoting=csv.QUOTE_MINIMAL)
+        logwriter = csv.writer(csvfile,delimiter=',',quotechar='"',quoting=csv.QUOTE_MINIMAL)
         logwriter.writerow(data)
 #        filednames = ['']
 #        logwriter = csv.DictWriter(csvfile,fieldnames=filednames)
@@ -71,17 +77,48 @@ def exportresults(filename,data):
 # Do this for all files in directory
 
 filelist = glob.glob(os.path.join(path,'*tdms'))
+# April 2017 Analysis
+data = []
 for file in filelist:
+    
     filename = os.path.split(file)[1] #just filename, cut out path
-    # Extract the distance value, which is the positive or negative value at start of our string. Should alway be followed by an underscore
-    distancematch = re.match(r'([0-9-]{1,})_.*tdms',filename,re.M|re.I)
-    if distancematch:
-        distance = distancematch.group(1)        
-        [average,std] = tdmsfunc1(path,file)
+    # Extract the XY coordinate values. Allows us to check file format also
+    datalabelsearch =  re.match(r'X([0-9-]{1,3})Y([0-9-]{1,3}).tdms',filename,re.M|re.I)   
+    # If file format correct, we can proceed
+    if datalabelsearch:
+        # Set x and y coordinate values. Note these are integers for now
+        # Done on an optical breadboard with 1 inch increments
+        x = datalabelsearch.group(1)
+        x = int(x)
+        y = datalabelsearch.group(2)
+        y = int(y)
+        [mean1,mean2,mean3,mean4] = tdmsfuncapr14(file)
+#        print filename, x,y, mean1,mean2,mean3,mean4
+        data.append([filename, x,y, mean1,mean2,mean3,mean4])
+#        print dataoutput
+        
     else:
         print 'not a real file, skip over'
-    print filename, distance, average, std
-    dataoutput = np.asarray([distance,average,std])
-    # Let's save our values to a file
-    exportresults(fileout,dataoutput)
+    
+dataoutput = np.asarray(data)
+# Let's save our values to a file
+#exportresults(fileout,data)
+with open(fileout,'wb') as f:
+    np.savetxt(f,data,fmt='%s',delimiter=',')
+
+# March file analysis 2017
+
+#for file in filelist:
+#    filename = os.path.split(file)[1] #just filename, cut out path
+#    # Extract the distance value, which is the positive or negative value at start of our string. Should alway be followed by an underscore
+#    distancematch = re.match(r'([0-9-]{1,})_.*tdms',filename,re.M|re.I)
+#    if distancematch:
+#        distance = distancematch.group(1)        
+#        [average,std] = tdmsfunc1(path,file)
+#    else:
+#        print 'not a real file, skip over'
+#    print filename, distance, average, std
+#    dataoutput = np.asarray([distance,average,std])
+#    # Let's save our values to a file
+#    exportresults(fileout,dataoutput)
     
