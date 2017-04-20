@@ -29,9 +29,9 @@ from plot_confusion_matrix import plot_confusion_matrix
 
 # File paths for accessing data
 
-path ='../Analysis/april14/'
+path ='../Analysis/april19/'
 
-output_dir = '../Analysis/april14/'
+output_dir = '../Analysis/april19/'
 output_file = 'xytable_analysis.csv'
 output_path = os.path.join(output_dir,output_file)
 # Class names
@@ -44,9 +44,9 @@ global x_train, x_test, nancount
 
 # Run Parameters
 #cvalue = 2e-3 # Pretty sure this isn't even referenced, at least for RBF kernel
-seedrange = 3 # Number of random seeds we will try
-segment = 0.90 # Percentage of data that we train on. Train on 0.8 means test on 0.2.
-plotbool=1 # Flag for plotting on or off
+seedrange = 5 # Number of random seeds we will try
+segment = 0.950 # Percentage of data that we train on. Train on 0.8 means test on 0.2.
+plotbool=0 # Flag for plotting on or off
 seed = 1
 singlerun = 1 # Flag for signaling that we are doing a single randomized evaluation. 1 is a single run.
 nancount = 0
@@ -240,7 +240,8 @@ else:
     # Finx the trial that had the highest overall accuracy        
     index, value = max(enumerate(ac),key=operator.itemgetter(1))
     # Generate a statement to summarize our trials
-    output_string = 'Data from %s. Cutting IMU. In %d randomizations, %d from seed %d has highest overall accuracy. Mean %d, min%d, stdev %d Individual accuracies for this seed are %s. Highest individuals are %s. Mean is %s Segment %.2f' %(path, seedrange,value,index,ac_mean,ac_min,np.std(ac),str(ac2[index,:]),str(ac2_max),str(ac2_mean),segment)
+#    output_string = 'Data from %s. Cutting IMU. In %d randomizations, %d from seed %d has highest overall accuracy. Mean %d, min%d, stdev %d Individual accuracies for this seed are %s. Highest individuals are %s. Mean is %s Segment %.2f' %(path, seedrange,value,index,ac_mean,ac_min,np.std(ac),str(ac2[index,:]),str(ac2_max),str(ac2_mean),segment)
+    output_string = 'Data from %s. In %d randomizations, %d from seed %d has highest overall accuracy. Mean %d, min%d, stdev %d Individual accuracies for this seed are %s. Highest individuals are %s. Mean is %s Segment %.2f' %(path, seedrange,value,index,ac_mean,ac_min,np.std(ac),str(ac2[index,:]),str(ac2_max),str(ac2_mean),segment)
     print output_string
 
 # Print to a logfile

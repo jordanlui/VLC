@@ -115,11 +115,11 @@ for file in filelist:
         data.append([filename, x,y, mean1,mean2,mean3,mean4])
         # Concatenate our data
         newdata = np.concatenate((labelcolumn,c1,c2,c3,c4),axis=1)
-        # Temporarily cut our new data
-        newdata = newdata[0:100,:]
-#        data2.append(newdata)
-        with open(os.path.join(pathout,"x.csv"),'ab') as f:
-            np.savetxt(f,newdata,fmt='%s',delimiter=',')
+        # Temporarily cut our new data for faster analysis and loading
+        newdata = newdata[0:300,:]
+        
+        data2.append(newdata)
+        
         label = label+1
 #        exportresults(os.path.join(pathout,"x.csv"),newdata)
 #        print dataoutput
@@ -128,7 +128,10 @@ for file in filelist:
         print 'not a real file, skip over'
     
 dataoutput = np.asarray(data)
-data2out = np.asarray(data2)
+data2out = np.vstack(data2)
+with open(os.path.join(pathout,"x.csv"),'wb') as f:
+    np.savetxt(f,data2out,fmt='%s',delimiter=',')
+
 # Let's save our values to a file
 #exportresults(fileout,dataoutput)
 #exportresults(os.path.join(pathout,"labels.csv") , labels)
