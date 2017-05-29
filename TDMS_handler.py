@@ -7,7 +7,7 @@ Created on Mon Mar 13 11:35:50 2017
 # Imports TDMS Files
 
 See more here:
-# Imports TDMS Files
+# Imports TDMS Files and makes CSV File of average values
 
 """
 
@@ -17,8 +17,8 @@ from nptdms import TdmsFile
 import numpy as np
 import os, glob, re, csv
 # Parameters
-path = "../Data/april19table/"
-pathout = '../analysis/april19/'
+path = "../Data/may29/"
+pathout = '../analysis/may29/'
 fileout = 'xytest_averages.csv'
 fileout = os.path.join(pathout,fileout)
 
@@ -46,10 +46,10 @@ def tdmsfuncapr14(filename):
     # Load the file    
     tdms_file = TdmsFile(filename)
     # Specify the channel to load. Format is tab, and then channel string name
-    channel1 = tdms_file.object('Untitled','1khz')
-    channel2 = tdms_file.object('Untitled','10khz')
-    channel3 = tdms_file.object('Untitled','40khz')
-    channel4 = tdms_file.object('Untitled','100khz')
+    channel1 = tdms_file.object('Untitled','1khz (Filtered)')
+    channel2 = tdms_file.object('Untitled','10khz (Filtered)')
+    channel3 = tdms_file.object('Untitled','40khz (Filtered)')
+    channel4 = tdms_file.object('Untitled','100khz (Filtered)')
 #    time= tdms_file.object('Untitled','Time*')    
     c1 = channel1.data
     c2 = channel2.data
@@ -116,7 +116,7 @@ for file in filelist:
         # Concatenate our data
         newdata = np.concatenate((labelcolumn,c1,c2,c3,c4),axis=1)
         # Temporarily cut our new data for faster analysis and loading
-        newdata = newdata[0:300,:]
+        newdata = newdata[100:700,:]
         
         data2.append(newdata)
         
