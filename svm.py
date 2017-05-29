@@ -29,9 +29,9 @@ from plot_confusion_matrix import plot_confusion_matrix
 
 # File paths for accessing data
 
-path ='../Analysis/april19/'
+path ='../Analysis/may29/'
 
-output_dir = '../Analysis/april19/'
+output_dir = '../Analysis/may29/'
 output_file = 'xytable_analysis.csv'
 output_path = os.path.join(output_dir,output_file)
 # Class names
@@ -45,10 +45,10 @@ global x_train, x_test, nancount
 # Run Parameters
 #cvalue = 2e-3 # Pretty sure this isn't even referenced, at least for RBF kernel
 seedrange = 5 # Number of random seeds we will try
-segment = 0.950 # Percentage of data that we train on. Train on 0.8 means test on 0.2.
-plotbool=1 # Flag for plotting on or off
+segment = 0.80 # Percentage of data that we train on. Train on 0.8 means test on 0.2.
+plotbool=0 # Flag for plotting on or off
 seed = 1
-singlerun = 1 # Flag for signaling that we are doing a single randomized evaluation. 1 is a single run.
+singlerun = 0 # Flag for signaling that we are doing a single randomized evaluation. 1 is a single run.
 nancount = 0
 
 # Functions
