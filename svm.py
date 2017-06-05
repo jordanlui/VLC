@@ -202,6 +202,8 @@ if singlerun == 1:
     # Shuffle data
     random.seed(a=seed)
     x = np.asarray(random.sample(x,len(x)))
+    
+    # Evaluate data with the model
     accuracy, confnorm = model(seed,segment,plotbool,x)
     
 #        output_string = 'In %d randomizations, %d from seed %d has highest overall accuracy. Mean %d, min%d, stdev %d Individual accuracies for this seed are %s. Highest individuals are %s. Mean is %s Segment %.2f' %(seedrange,value,index,ac_mean,ac_min,np.std(ac),str(ac2[index,:]),str(ac2_max),str(ac2_mean),segment)

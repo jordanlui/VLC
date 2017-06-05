@@ -138,36 +138,26 @@ for file in filelist:
         
     else:
         print 'not a real file, skip over'
-    
-dataoutput = np.asarray(data) # This is the table of average power values based on position
-data2out = np.vstack(data2) # This is the full table of power values 
-# Save our x matrix of all values
-with open(os.path.join(pathout,"x.csv"),'wb') as f:
-    np.savetxt(f,data2out,fmt='%s',delimiter=',')
 
-# Let's save our values to a file
+#  average power values     
+power_average = np.asarray(data) # This is the table of average power values based on position
+power_all = np.vstack(data2) # This is the full table of power values 
+
+# Save x matrix of all values to file
+with open(os.path.join(pathout,"x.csv"),'wb') as f:
+    np.savetxt(f,power_all,fmt='%s',delimiter=',')
+
+# Let's save our values to a file - not currently working - so abandoned.
 #exportresults(fileout,dataoutput)
 #exportresults(os.path.join(pathout,"labels.csv") , labels)
+
 # Save data averages to a file
 with open(fileout,'wb') as f:
-    np.savetxt(f,dataoutput,fmt='%s',delimiter=',')
+    np.savetxt(f,power_average,fmt='%s',delimiter=',')
+
 # Save our labels to a file
 with open(os.path.join(pathout,"labels.csv"),'wb') as f:
     np.savetxt(f,labels,fmt='%s',delimiter=',')
 
-# March file analysis 2017
 
-#for file in filelist:
-#    filename = os.path.split(file)[1] #just filename, cut out path
-#    # Extract the distance value, which is the positive or negative value at start of our string. Should alway be followed by an underscore
-#    distancematch = re.match(r'([0-9-]{1,})_.*tdms',filename,re.M|re.I)
-#    if distancematch:
-#        distance = distancematch.group(1)        
-#        [average,std] = tdmsfunc1(path,file)
-#    else:
-#        print 'not a real file, skip over'
-#    print filename, distance, average, std
-#    dataoutput = np.asarray([distance,average,std])
-#    # Let's save our values to a file
-#    exportresults(fileout,dataoutput)
     
