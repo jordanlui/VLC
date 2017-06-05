@@ -27,6 +27,7 @@ x = np.genfromtxt(os.path.join(path,"x.csv"),delimiter=',')
 
 # Functions
 def dataprep(x,seed,segment,twidth):
+    # Takes our x matrix and shuffles, segments, and extracts label values
     random.seed(a=seed)
     x = np.asarray(random.sample(x,len(x)))
     
@@ -50,7 +51,7 @@ def dataprep(x,seed,segment,twidth):
         t_test = np.reshape(t_test,(t_test.shape[0],twidth))
 
     return x_train,x_test,t_train,t_test
-def model():
+def model(x):
     # Accepts a test value. Model will search for nearest coordinate in xmatrix list and return the coordinates
     return 0
 def score():
@@ -58,11 +59,16 @@ def score():
     return 0
 
 # Main loop
-# Import our data to get started
+# Import our data to get started. 
 [x_train, x_test, t_train, t_test] = dataprep(x,seed,segment,twidth)
 
 
 # Loop though a test set, evaluate accuracy for each one
+# Define empty error object
+error = []
+for row in range(0,x_test.shape[0]):
+    testdata = x_test[row,:] # Our testing data row
+    realcoord = t_test[row,:] # note this is currently a  2L, array. not 2x1.
 
 # Data analysis
 # Some method to average or quantify error through the whole test set
