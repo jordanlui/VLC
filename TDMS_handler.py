@@ -107,10 +107,15 @@ for file in filelist:
         [mean1,mean2,mean3,mean4,c1,c2,c3,c4] = tdmsfuncapr14(file)
         # Format classname in a format we desire        
         classname = 'x'+str(x)+'y'+str(y)
+        # Try making a new row that we can work with
+        labelsrow = [classname,x,y]
         # Store this to a label file
-        labels.append(classname)
-        # Generate column label for data
+        labels.append(labelsrow) # This is the name table of all possible labels and coordinates
+        # Generate column label for data so we can generate matrix
         labelcolumn = label * np.ones((len(c1),1))
+#        labelcolumn2 = labelsrow * np.ones((len(c1),1))
+#        labeltest = np.asarray(labelsrow)
+#        print np.repeat(labelsrow,3)
         # Write mean values to data array
         data.append([filename, x,y, mean1,mean2,mean3,mean4])
         # Concatenate our data
@@ -120,23 +125,26 @@ for file in filelist:
         
         data2.append(newdata)
         
-        label = label+1
+        label = label+1 # increment our archaic label ordinal system. soon to be removed.
 #        exportresults(os.path.join(pathout,"x.csv"),newdata)
 #        print dataoutput
         
     else:
         print 'not a real file, skip over'
     
-dataoutput = np.asarray(data)
-data2out = np.vstack(data2)
+dataoutput = np.asarray(data) # This is the table of average power values based on position
+data2out = np.vstack(data2) # This is the full table of power values 
+# Save our x matrix of all values
 with open(os.path.join(pathout,"x.csv"),'wb') as f:
     np.savetxt(f,data2out,fmt='%s',delimiter=',')
 
 # Let's save our values to a file
 #exportresults(fileout,dataoutput)
 #exportresults(os.path.join(pathout,"labels.csv") , labels)
+# Save data averages to a file
 with open(fileout,'wb') as f:
     np.savetxt(f,dataoutput,fmt='%s',delimiter=',')
+# Save our labels to a file
 with open(os.path.join(pathout,"labels.csv"),'wb') as f:
     np.savetxt(f,labels,fmt='%s',delimiter=',')
 

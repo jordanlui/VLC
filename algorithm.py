@@ -6,3 +6,9 @@ Created on Mon Jun 05 10:22:18 2017
 """
 
 print 'ciao a tutti'
+
+# Load data
+
+# Train the model coefficient or load the table of data
+
+# Test

@@ -105,7 +105,7 @@ def confusion_matrix_normalize(conf):
 def model(seed,segment,plotbool,x):
     # Model that performs our analysis and generates confusion matrix
     # Get our global variables
-    global filelist, numfiles, accuracy, conf, confnorm, x_train, x_test, nancount
+    global filelist, numfiles, accuracy, conf, confnorm, x_train, x_test, nancount, t_train, t_test
     
     # New method
     # Load data into xmatrix
@@ -249,6 +249,11 @@ text_file = open(os.path.join(output_dir,"log.txt"), "a")
 text_file.write(str(datetime.datetime.now())+" "+output_string+"\n")
 text_file.close()
     
+# Generate proper label files
     
-#if __name__ == '__main__':
-#    main()
+    
+# Save matrices to file for future analysis
+np.savetxt('x_train.csv',x_train,delimiter=',')
+np.savetxt('x_test.csv',x_test,delimiter=',')
+np.savetxt('t_train.csv',t_train,delimiter=',')
+np.savetxt('t_test.csv',t_test,delimiter=',')
