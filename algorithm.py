@@ -3,12 +3,19 @@
 Created on Mon Jun 05 10:22:18 2017
 
 @author: Jordan
+
+Localization Algorithm
+
+2017 June 6: Algorithm doing basic match against table of average values for the 4 channel power values.
+Data source: May 29 data recording
+
 """
 
-print 'ciao a tutti'
+print 'Start of script'
 
 # Libraries
 import numpy as np
+import os, random
 
 # Constants and parameters
 path ='../Analysis/may29/' # Main working directory
@@ -22,7 +29,8 @@ output_file = 'xytable_analysis.csv' # Analysis Summary file
 output_path = os.path.join(output_dir,output_file)
 
 # Load data
-x = np.genfromtxt(os.path.join(path,"x.csv"),delimiter=',')
+x = np.genfromtxt(os.path.join(path,"x.csv"),delimiter=',') # The real x data
+xavg = np.genfromtxt(os.path.join(path,"xavg.csv"),delimiter=',') # The database of signal strengths
 
 
 # Functions
@@ -51,9 +59,49 @@ def dataprep(x,seed,segment,twidth):
         t_test = np.reshape(t_test,(t_test.shape[0],twidth))
 
     return x_train,x_test,t_train,t_test
-def model(x):
-    # Accepts a test value. Model will search for nearest coordinate in xmatrix list and return the coordinates
-    return 0
+    
+def min_in_list(column):
+    # Finds index of minimum value in a list (no interpolation)
+    # Initialize empty search variable for the 
+    minsofar = column[0]
+    mindex = []
+    # Loop through, but skip last iteration because we'll go too far
+    for i in range(0,int(column.shape[0])-1):
+        
+        if column[i+1] < minsofar:
+            # Smaller value found. Update minsofar and mindex
+            minsofar = column[i+1]
+            mindex = i+1
+    return mindex
+    
+def model_database(database,query):
+    # Accepts a test value. Model will search for nearest coordinate in database list and return the coordinates
+    # Database format should be [x,y,A,B,C,D]
+    # Inputs are the database, the column to search in, and the queried value (power value)
+    
+    # Determine number of channels
+    channels = int(query.shape[0])
+    
+    # Allocate lists to hold our coordinates
+    xs=[] 
+    ys=[]
+    
+    # loop through each channel (0,1,2,3)
+    for channel in range(0,channels):
+        
+        column = database[:,channel+2] # Grab the single column
+        query_single = query[channel] # Grab single query value
+        column_diff = abs(column - query_single)
+        
+        # Use index algorithm to find the row with power value closest to query value
+        index = min_in_list(column_diff)
+        # Use index value to find corresponding x and y values. Append to list
+        xfound = database[index,0]
+        yfound = database[index,1]
+        xs.append(xfound)
+        ys.append(yfound)
+#        print channel, query_single, index
+    return xs,ys
 def score():
     # Accepts prediction and real value. Returns a 
     return 0
@@ -66,9 +114,24 @@ def score():
 # Loop though a test set, evaluate accuracy for each one
 # Define empty error object
 error = []
-for row in range(0,x_test.shape[0]):
-    testdata = x_test[row,:] # Our testing data row
-    realcoord = t_test[row,:] # note this is currently a  2L, array. not 2x1.
+# Use a static line to test the function
+sampleindex = 2
+query = x_test[sampleindex,:]
+xreal = t_test[sampleindex,0]
+yreal = t_test[sampleindex,1]
+[xs, ys] = model_database(xavg,query)
+
+
+xavg = np.mean(xs)
+yavg = np.mean(ys)
+
+print 'predict coord', xavg,yavg
+print 'real is',xreal,yreal
+
+# For our simple algorith, we simply find closest location for each of the 4 channels
+
 
 # Data analysis
 # Some method to average or quantify error through the whole test set
+
+print 'end of analysis'
