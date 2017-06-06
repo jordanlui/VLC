@@ -22,6 +22,7 @@ path ='../Analysis/may29/' # Main working directory
 seed = 1
 segment = 0.7 # Segment of data we train on 
 twidth = 2 # We have two columns of label data in front of x matrix from May 29
+tableconversion = 1 * 25.4 # unit length on optical table is 2.54 cm or 25.4 mm
 
 
 output_dir = '../Analysis/may29/' # Directory for results output
@@ -36,6 +37,7 @@ xavg = np.genfromtxt(os.path.join(path,"xavg.csv"),delimiter=',') # The database
 # Functions
 def dataprep(x,seed,segment,twidth):
     # Takes our x matrix and shuffles, segments, and extracts label values
+    # Shuffle data
     random.seed(a=seed)
     x = np.asarray(random.sample(x,len(x)))
     
@@ -71,7 +73,7 @@ def min_in_list(column):
         if column[i+1] < minsofar:
             # Smaller value found. Update minsofar and mindex
             minsofar = column[i+1]
-            mindex = i+1
+            mindex = i+1 # This is the index of smallest value found so far
     return mindex
     
 def model_database(database,query):
@@ -102,9 +104,19 @@ def model_database(database,query):
         ys.append(yfound)
 #        print channel, query_single, index
     return xs,ys
-def score():
-    # Accepts prediction and real value. Returns a 
-    return 0
+def score(tx,ty,px,py):
+    # Accepts prediction and real value. Returns a SSE error value
+    # Inputs are [truex,truey,predx,predy]
+    # Note that we may receive vector of predictions
+    import numpy as np
+    if len(px) > 1 or len(py) > 1:
+        x = np.mean(px)
+        y = np.mean(py)
+    else:
+        x = px
+        y = py
+    sse = (tx-x)**2 + (ty-y)**2
+    return sse
 
 # Main loop
 # Import our data to get started. 
@@ -114,13 +126,14 @@ def score():
 # Loop though a test set, evaluate accuracy for each one
 # Define empty error object
 error = []
+#for i in range(0,len(t_test)):
 # Use a static line to test the function
-sampleindex = 2
+sampleindex = 1
 query = x_test[sampleindex,:]
 xreal = t_test[sampleindex,0]
 yreal = t_test[sampleindex,1]
-[xs, ys] = model_database(xavg,query)
 
+[xs, ys] = model_database(xavg,query)
 
 xavg = np.mean(xs)
 yavg = np.mean(ys)
@@ -128,8 +141,10 @@ yavg = np.mean(ys)
 print 'predict coord', xavg,yavg
 print 'real is',xreal,yreal
 
-# For our simple algorith, we simply find closest location for each of the 4 channels
-
+# Score our result
+score = score(xreal,yreal,xs,ys)
+print 'error is',score # This actual error score would be in inches
+print 'spatial error is',score*tableconversion, 'mm'
 
 # Data analysis
 # Some method to average or quantify error through the whole test set
