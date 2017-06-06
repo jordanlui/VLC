@@ -108,14 +108,20 @@ def score(tx,ty,px,py):
     # Accepts prediction and real value. Returns a SSE error value
     # Inputs are [truex,truey,predx,predy]
     # Note that we may receive vector of predictions
+    sse = []
     import numpy as np
     if len(px) > 1 or len(py) > 1:
-        x = np.mean(px)
-        y = np.mean(py)
+#        x = np.mean(px)
+#        y = np.mean(py)
+        for i in range(0,len(px)):
+            x = px[i]
+            y = py[i]
+            # Calculate error as Euclidean distance
+            sse.append(float(np.sqrt((tx-x)**2 + (ty-y)**2)))
     else:
         x = px
         y = py
-    sse = float((tx-x)**2 + (ty-y)**2)
+        sse = float(np.sqrt((tx-x)**2 + (ty-y)**2))
     return sse
 
 # Main loop
@@ -126,7 +132,7 @@ def score(tx,ty,px,py):
 # Loop though a test set, evaluate accuracy for each one
 # Define empty error object
 error = []
-for i in range(0,200):
+for i in range(0,500):
 
     sampleindex = i
     
@@ -152,6 +158,9 @@ for i in range(0,200):
 
 # Data analysis
 # Some method to average or quantify error through the whole test set
-print 'mean error is',np.mean(error)*tableconversion,'mm'
+errormeans = np.mean(error,axis=0)*tableconversion
+print 'mean error in channel is', errormeans,'mm'
+print 'mean error overall is', np.mean(errormeans),'mm'
+print 'mean error of channels A,B,C is', np.mean( errormeans[:-1])
 
 print 'end of analysis'
