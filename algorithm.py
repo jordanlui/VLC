@@ -31,7 +31,7 @@ output_path = os.path.join(output_dir,output_file)
 
 # Load data
 x = np.genfromtxt(os.path.join(path,"x.csv"),delimiter=',') # The real x data
-xavg = np.genfromtxt(os.path.join(path,"xavg.csv"),delimiter=',') # The database of signal strengths
+database = np.genfromtxt(os.path.join(path,"xavg.csv"),delimiter=',') # The database of signal strengths
 
 
 # Functions
@@ -66,7 +66,7 @@ def min_in_list(column):
     # Finds index of minimum value in a list (no interpolation)
     # Initialize empty search variable for the 
     minsofar = column[0]
-    mindex = []
+    mindex = [0]
     # Loop through, but skip last iteration because we'll go too far
     for i in range(0,int(column.shape[0])-1):
         
@@ -115,7 +115,7 @@ def score(tx,ty,px,py):
     else:
         x = px
         y = py
-    sse = (tx-x)**2 + (ty-y)**2
+    sse = float((tx-x)**2 + (ty-y)**2)
     return sse
 
 # Main loop
@@ -126,27 +126,32 @@ def score(tx,ty,px,py):
 # Loop though a test set, evaluate accuracy for each one
 # Define empty error object
 error = []
-#for i in range(0,len(t_test)):
-# Use a static line to test the function
-sampleindex = 1
-query = x_test[sampleindex,:]
-xreal = t_test[sampleindex,0]
-yreal = t_test[sampleindex,1]
+for i in range(0,200):
 
-[xs, ys] = model_database(xavg,query)
-
-xavg = np.mean(xs)
-yavg = np.mean(ys)
-
-print 'predict coord', xavg,yavg
-print 'real is',xreal,yreal
-
-# Score our result
-score = score(xreal,yreal,xs,ys)
-print 'error is',score # This actual error score would be in inches
-print 'spatial error is',score*tableconversion, 'mm'
+    sampleindex = i
+    
+    # Extract our query value
+    query = x_test[sampleindex,:]
+    xreal = t_test[sampleindex,0]
+    yreal = t_test[sampleindex,1]
+    
+    [xs, ys] = model_database(database,query)
+    
+    xavg = np.mean(xs)
+    yavg = np.mean(ys)
+    
+#    print 'predict coord', xavg,yavg
+#    print 'real is',xreal,yreal
+    
+    # Score our result. 
+    # Force a float because of some outputs that occur
+    error_single = score(xreal,yreal,xs,ys)
+#    print 'error is',score # This actual error score would be in inches
+#    print 'spatial error is',score*tableconversion, 'mm'
+    error.append(error_single)
 
 # Data analysis
 # Some method to average or quantify error through the whole test set
+print 'mean error is',np.mean(error)*tableconversion,'mm'
 
 print 'end of analysis'
