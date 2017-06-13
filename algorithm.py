@@ -33,6 +33,9 @@ output_path = os.path.join(output_dir,output_file)
 x = np.genfromtxt(os.path.join(path,"x.csv"),delimiter=',') # The real x data
 database = np.genfromtxt(os.path.join(path,"xavg.csv"),delimiter=',') # The database of signal strengths
 
+# Normalize our data - 
+#x[:,2:] = (x[:,2:] - x[:,2:].min(0)) / x[:,2:].ptp(0)
+#database[:,2:] = (database[:,2:] - database[:,2:].min(0)) / database[:,2:].ptp(0)
 
 # Functions
 def dataprep(x,seed,segment,twidth):
@@ -128,6 +131,7 @@ def score(tx,ty,px,py):
 # Import our data to get started. 
 [x_train, x_test, t_train, t_test] = dataprep(x,seed,segment,twidth)
 
+# Better idea to use the x_train data as the source for our database. This will require some re-processing
 
 # Loop though a test set, evaluate accuracy for each one
 # Define empty error object

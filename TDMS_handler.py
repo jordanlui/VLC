@@ -8,6 +8,9 @@ Created on Mon Mar 13 11:35:50 2017
 
 See more here:
 # Imports TDMS Files and makes CSV File of average values
+Currently the script outputs raw values, which were low pass filtered by the LabVIEW script
+Next step: Normalize values before create the averages file, and likely enable high accuracies
+
 
 """
 
@@ -19,7 +22,7 @@ import os, glob, re, csv
 # Parameters
 path = "../Data/may29/"
 pathout = '../analysis/may29/'
-fileout = 'xytest_averages.csv'
+fileout = 'xytest_averages.csv' # output file name of the averages file
 fileout = os.path.join(pathout,fileout)
 
 
@@ -123,7 +126,7 @@ for file in filelist:
         # Write mean values to data array
         data.append([filename, x,y, mean1,mean2,mean3,mean4])
         
-        # Concatenate our data
+        # Concatenate our data into a matrix
         newdata = np.concatenate((labelcolumn,c1,c2,c3,c4),axis=1)
  
         # If desired, we can cut out some data in each loop to decrease x-matrix size
