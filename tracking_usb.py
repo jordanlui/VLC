@@ -20,13 +20,19 @@ ap.add_argument("-b", "--buffer", type=int, default=64,
 args = vars(ap.parse_args())
 
 # Parameters for operation
-camera_address = 1 # 1 for the USB webcam, 0 for the onboard webcam
+camera_address = 0 # 1 for the USB webcam, 0 for the onboard webcam
 
 # define the lower and upper boundaries of the "green"
 # ball in the HSV (RGB??) color space, then initialize the
 # list of tracked points
-greenLower = (14, 115, 37)			#Green Default = 29, 86, 6
-greenUpper = (100, 255, 255)			#Green Default = 64, 255, 255
+
+# HSV Values for green bottle cap. Optimized for the lamp lighting
+greenLower = (38,70,61)
+greenUpper = (112,250,217)
+
+# Bounds for the unlit table are below, but will be less accurate
+# greenLower = (66,91,23)	
+# greenUpper = (121,211,169)	
 pts = deque(maxlen=args["buffer"])
 #Green Egg Works better than the Pink one
 
