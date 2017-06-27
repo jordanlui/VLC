@@ -20,15 +20,19 @@ ap.add_argument("-b", "--buffer", type=int, default=64,
 args = vars(ap.parse_args())
 
 # Parameters for operation
-camera_address = 0 # 1 for the USB webcam, 0 for the onboard webcam
+camera_address = 1 # 1 for the USB webcam, 0 for the onboard webcam
 
 # define the lower and upper boundaries of the "green"
 # ball in the HSV (RGB??) color space, then initialize the
 # list of tracked points
 
 # HSV Values for green bottle cap. Optimized for the lamp lighting
-greenLower = (38,70,61)
-greenUpper = (112,250,217)
+# greenLower = (38,70,61)
+# greenUpper = (112,250,217)
+
+# HSV Values for table covered with white poster. 20170627
+greenLower = (49,80,30)
+greenUpper = (107,255,94)
 
 # Bounds for the unlit table are below, but will be less accurate
 # greenLower = (66,91,23)	
@@ -70,7 +74,8 @@ while True:
 		break
 
 	#Flip the frame
-	frame = cv2.flip(frame, 1)
+	# Try disabling the flipping, so we get less confused. 20170627
+	# frame = cv2.flip(frame, 1)
 
 	# write the frame
 	#video.write(frame)
