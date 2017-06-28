@@ -20,7 +20,7 @@ ap.add_argument("-b", "--buffer", type=int, default=64,
 args = vars(ap.parse_args())
 
 # Parameters for operation
-camera_address = 1 # 1 for the USB webcam, 0 for the onboard webcam
+camera_address = 0 # 1 for the USB webcam, 0 for the onboard webcam
 
 # define the lower and upper boundaries of the "green"
 # ball in the HSV (RGB??) color space, then initialize the
