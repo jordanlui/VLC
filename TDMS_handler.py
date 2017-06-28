@@ -65,26 +65,46 @@ def tdmsfuncjun(filename):
     tdms_file = TdmsFile(filename) # Load the file
     
     # Load the individual data channels
+    
     c1 = tdms_file.object('Untitled','1khz (Filtered)').data
     c2 = tdms_file.object('Untitled','10khz (Filtered)').data
     c3 = tdms_file.object('Untitled','40khz (Filtered)').data
     c4 = tdms_file.object('Untitled','100khz (Filtered)').data
+    
     # Load time data and coord data. More painful
-    x = tdms_file.object('Untitled','100khz (Filtered)').data
-#    t = tdms_file.object('Untitled','Time').data
+    x = tdms_file.object('Untitled','Resampled').data
+    y = tdms_file.object('Untitled','Resampled 1').data
+    t = tdms_file.object('Untitled','1khz (Filtered)').time_track()
     
     # Reshape data
-    c1 = np.reshape(c1,(len(c1),1))
-    c2 = np.reshape(c2,(len(c2),1))
-    c3 = np.reshape(c3,(len(c3),1))
-    c4 = np.reshape(c4,(len(c4),1))
+    c1 = np.reshape(c1, (len(c1),1))
+    c2 = np.reshape(c2, (len(c2),1))
+    c3 = np.reshape(c3, (len(c3),1))
+    c4 = np.reshape(c4, (len(c4),1))
+    x = np.reshape(x, (len(x),1))
+    y = np.reshape(y, (len(y),1))
+    t = np.reshape(t, (len(t),1))
     
-    print 'check data length'
-    print tdms_file.object('Untitled','1khz (Filtered)')
-    print 'size of x',x.shape
     
-    print c1.shape
-    return c1
+    print 'length compare', len(x), len(c1)
+    # Fix jagged edge issue
+    if len(x) < len(c1):
+        # The fix jagged edge issue
+        jagged = len(x)
+        c1 = c1[:jagged]
+        c2 = c2[:jagged]
+        c3 = c3[:jagged]
+        c4 = c4[:jagged]
+        t = t[:jagged]
+        
+    # Format as a new array
+    f = np.concatenate((t,x,y,c1,c2,c3,c4), axis=1)
+    
+    # Return result
+    return f   
+    
+    
+    
     
 
 
@@ -169,5 +189,5 @@ def discretefiles():
 print 'Testing new code June 2017'
 testarray = tdmsfuncjun(path)
 print 'function finished'
-print testarray.shape
+#print testarray.shape
     
