@@ -23,29 +23,11 @@ from nptdms import TdmsFile
 import numpy as np
 import os, glob, re, csv
 # Parameters
-path = "../Data/may29/"
-pathout = '../analysis/may29/'
-fileout = 'xytest_averages.csv' # output file name of the averages file
+path = "../Data/june27/circle_slow_1.tdms"
+pathout = '../analysis/jun27/'
+fileout = 'averages.csv' # output file name of the averages file
 fileout = os.path.join(pathout,fileout)
 
-
-# Main Code
-#filename = "20_2017_03_10_16_43_46.tdms"
-def tdmsfunc1(path,filename):
-    # Accepts a filename and path. Opens TDMS file and extracts single column of data.
-    # Import file    
-    tdms_file = TdmsFile(filename)
-    #specify the channel
-    channel = tdms_file.object('Untitled','Dev2/ai0')
-    # Does following line convert to a data object?    
-    data = channel.data
-#    time = channel.time_track()
-    datamean = np.mean(data)
-    datastd = np.std(data)
-#    print 'mean of data is',average
-#    print 'distance is', distance,'mm'
-#    print 'filename is',filename
-    return datamean, datastd
 
 def tdmsfuncapr14(filename):
     # Accepts a filename and path. Opens TDMS file and extracts 4 columns of data, as per April 14 tests.
@@ -75,22 +57,36 @@ def tdmsfuncapr14(filename):
 #    print 'distance is', distance,'mm'
 #    print 'filename is',filename
     return mean1,mean2,mean3,mean4,c1,c2,c3,c4
-#def tdmsfuncjun(filename):
+def tdmsfuncjun(filename):
     # Accepts files from June 2017, which now have motion tracker data incorporated
+    # Goal: Create a matrix containing labels and x values [time,x,y,a,b,c,d]
+    
+    # Load the file
+    tdms_file = TdmsFile(filename) # Load the file
+    
+    # Load the individual data channels
+    c1 = tdms_file.object('Untitled','1khz (Filtered)').data
+    c2 = tdms_file.object('Untitled','10khz (Filtered)').data
+    c3 = tdms_file.object('Untitled','40khz (Filtered)').data
+    c4 = tdms_file.object('Untitled','100khz (Filtered)').data
+    # Load time data and coord data. More painful
+    x = tdms_file.object('Untitled','100khz (Filtered)').data
+#    t = tdms_file.object('Untitled','Time').data
+    
+    # Reshape data
+    c1 = np.reshape(c1,(len(c1),1))
+    c2 = np.reshape(c2,(len(c2),1))
+    c3 = np.reshape(c3,(len(c3),1))
+    c4 = np.reshape(c4,(len(c4),1))
+    
+    print 'check data length'
+    print tdms_file.object('Untitled','1khz (Filtered)')
+    print 'size of x',x.shape
+    
+    print c1.shape
+    return c1
+    
 
-#def exportresults(filename,data):
-##    file_exists = os.path.isfile(filename)
-#    with open(filename,'wb') as csvfile:
-#        logwriter = csv.writer(csvfile,delimiter=',',quotechar='"',quoting=csv.QUOTE_MINIMAL)
-#        logwriter.writerow(data)
-#        filednames = ['']
-#        logwriter = csv.DictWriter(csvfile,fieldnames=filednames)
-#        if not file_exists:
-#            logwriter.writeheader()
-#        logwriter.writerow()
-        
-
-# Do this for all files in directory
 
 def discretefiles():
     # Processes files in a directory, from our discrete recording method in April 2017
@@ -170,5 +166,8 @@ def discretefiles():
         np.savetxt(f,labels,fmt='%s',delimiter=',')
 
 # Main code
-print 'hello'
+print 'Testing new code June 2017'
+testarray = tdmsfuncjun(path)
+print 'function finished'
+print testarray.shape
     

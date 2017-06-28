@@ -38,6 +38,7 @@ output_path = os.path.join(output_dir,output_file)
 
 # Load data
 x = np.genfromtxt(os.path.join(path,"x.csv"),delimiter=',') # The real x data
+#x = np.genfromtxt('../Analysis/may29/x.csv',delimiter=',')
 database = np.genfromtxt(os.path.join(path,"xavg.csv"),delimiter=',') # The database of signal strengths
 
 # Normalize our data - 
