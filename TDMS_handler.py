@@ -26,12 +26,12 @@ import os, glob, re, csv
 # Parameters
 # Input file directory
 filename = 'circle_fast_2.tdms'
-dirout = "../Data/june27/"
-path = dirout + filename
+dir_in = "../Data/june27/"
+path_in = dir_in + filename
 # Output file parameters
-pathout = '../analysis/june27/'
+dir_out = '../analysis/june27/'
 fileout = filename[:-5] + '.csv' # output file name of the averages file, named based on input file. Clipped to remove TDMS filename
-filepathout = os.path.join(pathout,fileout)
+path_out = os.path.join(dir_out,fileout)
 
 
 def tdmsfuncapr14(filename):
@@ -110,10 +110,10 @@ def tdmsfuncjun(filename):
 
 # Main code
 print 'Testing new code June 2017'
-f = tdmsfuncjun(path)
+f = tdmsfuncjun(path_in)
 print 'function finished'
 
 # Save results to file
-with open(os.path.join(pathout,fileout),'wb') as file:
+with open(os.path.join(dir_out,fileout),'wb') as file:
         np.savetxt(file,f,fmt='%s',delimiter=',')
     

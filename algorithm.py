@@ -12,7 +12,9 @@ Very rudimientary - and probably has error resulting from the non function natur
 
 June 14: Assume a generally circular radiation symmetry. Do basic finger printing type analysis.
 From each channel, find coordinate of closest power value. Find a distance value d.
-Do a triangulation routine. Get 4 possible points and average the result.
+From this, Do a triangulation routine. Get 4 possible points and average the result.
+
+June 28: Try to fit a 2D Gaussian to each channel
 
 """
 from __future__ import division
