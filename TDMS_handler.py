@@ -22,11 +22,16 @@ Updated code for the continuous motion tracking method
 from nptdms import TdmsFile
 import numpy as np
 import os, glob, re, csv
+
 # Parameters
-path = "../Data/june27/circle_slow_1.tdms"
-pathout = '../analysis/jun27/'
-fileout = 'averages.csv' # output file name of the averages file
-fileout = os.path.join(pathout,fileout)
+# Input file directory
+filename = 'circle_fast_2.tdms'
+dirout = "../Data/june27/"
+path = dirout + filename
+# Output file parameters
+pathout = '../analysis/june27/'
+fileout = filename[:-5] + '.csv' # output file name of the averages file, named based on input file. Clipped to remove TDMS filename
+filepathout = os.path.join(pathout,fileout)
 
 
 def tdmsfuncapr14(filename):
@@ -87,7 +92,7 @@ def tdmsfuncjun(filename):
     
     
     print 'length compare', len(x), len(c1)
-    # Fix jagged edge issue
+    # Fix jagged edge issue, where size of x,y column often shorter than the photodiode data
     if len(x) < len(c1):
         # The fix jagged edge issue
         jagged = len(x)
@@ -103,10 +108,12 @@ def tdmsfuncjun(filename):
     # Return result
     return f   
 
-
 # Main code
 print 'Testing new code June 2017'
-testarray = tdmsfuncjun(path)
+f = tdmsfuncjun(path)
 print 'function finished'
-#print testarray.shape
+
+# Save results to file
+with open(os.path.join(pathout,fileout),'wb') as file:
+        np.savetxt(file,f,fmt='%s',delimiter=',')
     
