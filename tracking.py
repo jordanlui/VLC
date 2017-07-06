@@ -1,9 +1,7 @@
 # USAGE
-# python object_movement.py --video object_tracking_example.mp4
-# python object_movement.py
-
-# Code Status
-# 2017 06 05 working when we change conditional check on pts deque size check
+# python ball_tracking.py --video ball_tracking_example.mp4
+# python ball_tracking.py
+# This script is configured to 
 
 # import the necessary packages
 from collections import deque
@@ -11,52 +9,87 @@ import numpy as np
 import argparse
 import imutils
 import cv2
+import time
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video",
 	help="path to the (optional) video file")
-ap.add_argument("-b", "--buffer", type=int, default=32,
+ap.add_argument("-b", "--buffer", type=int, default=64,
 	help="max buffer size")
 args = vars(ap.parse_args())
 
-# define the lower and upper boundaries of the "green"
-# ball in the HSV color space
-greenLower = (29, 86, 6)
-greenUpper = (64, 255, 255)
+# Parameters for operation
+camera_address = 0 # 1 for the USB webcam, 0 for the onboard webcam
 
-# initialize the list of tracked points, the frame counter,
-# and the coordinate deltas
+# define the lower and upper boundaries of the "green"
+# ball in the HSV (RGB??) color space, then initialize the
+# list of tracked points
+
+# HSV Values for green bottle cap. Optimized for the lamp lighting
+# greenLower = (38,70,61)
+# greenUpper = (112,250,217)
+
+# HSV Values for table covered with white poster. 20170627
+greenLower = (49,80,30)
+greenUpper = (107,255,94)
+
+# Bounds for the unlit table are below, but will be less accurate
+# greenLower = (66,91,23)	
+# greenUpper = (121,211,169)	
 pts = deque(maxlen=args["buffer"])
-counter = 0
-(dX, dY) = (0, 0)
-direction = ""
+#Green Egg Works better than the Pink one
 
 # if a video path was not supplied, grab the reference
 # to the webcam
 if not args.get("video", False):
-	camera = cv2.VideoCapture(0)
+	camera = cv2.VideoCapture(camera_address)
 
 # otherwise, grab a reference to the video file
 else:
 	camera = cv2.VideoCapture(args["video"])
 
+# Define the codec and create VideoWriter object
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+#size = (int(camera.get(cv2.CAP_PROP_FRAME_WIDTH)), int(camera.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+size = (640,480)
+video = cv2.VideoWriter('output.avi',fourcc, 30.0, size)
+# Define and Open coordinates text file
+text_file = open("OutputTest.txt", "w")
+text_file.close()
+
+
+time.sleep(2.5)
+
 # keep looping
 while True:
+	
 	# grab the current frame
 	(grabbed, frame) = camera.read()
+	text_file = open("OutputTest.txt", "a")
 
 	# if we are viewing a video and we did not grab a frame,
 	# then we have reached the end of the video
 	if args.get("video") and not grabbed:
 		break
 
+	#Flip the frame
+	# Try disabling the flipping, so we get less confused. 20170627
+	# frame = cv2.flip(frame, 1)
+
+	# write the frame
+	#video.write(frame)
+	
 	# resize the frame, blur it, and convert it to the HSV
 	# color space
-	frame = imutils.resize(frame, width=600)
+	#frame = imutils.resize(frame, width=600) #This line of code seems to prevent the video.write from working later on
+	
 	# blurred = cv2.GaussianBlur(frame, (11, 11), 0)
 	hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
+	# write the frame
+	#video.write(frame)
+	
 	# construct a mask for the color "green", then perform
 	# a series of dilations and erosions to remove any small
 	# blobs left in the mask
@@ -80,6 +113,9 @@ while True:
 		M = cv2.moments(c)
 		center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
 
+		print((x, y))
+		text_file.write("{X: %.3f, Y: %.3f} \n" % (x, y))
+
 		# only proceed if the radius meets a minimum size
 		if radius > 10:
 			# draw the circle and centroid on the frame,
@@ -87,69 +123,38 @@ while True:
 			cv2.circle(frame, (int(x), int(y)), int(radius),
 				(0, 255, 255), 2)
 			cv2.circle(frame, center, 5, (0, 0, 255), -1)
-			pts.appendleft(center)
+
+	# update the points queue
+	pts.appendleft(center)
 
 	# loop over the set of tracked points
-	for i in np.arange(1, len(pts)):
+	for i in xrange(1, len(pts)):
 		# if either of the tracked points are None, ignore
 		# them
 		if pts[i - 1] is None or pts[i] is None:
 			continue
-
-		# check to see if enough points have been accumulated in
-		# the buffer
-		# if counter >= 10 and i == 1 and pts[-10] is not None:
-		if counter >= 10 and i == 1 and len(pts) >= 10 and pts[-10] is not None:
-			# compute the difference between the x and y
-			# coordinates and re-initialize the direction
-			# text variables
-			dX = pts[-10][0] - pts[i][0]
-			dY = pts[-10][1] - pts[i][1]
-			(dirX, dirY) = ("", "")
-
-			# ensure there is significant movement in the
-			# x-direction
-			if np.abs(dX) > 20:
-				dirX = "East" if np.sign(dX) == 1 else "West"
-
-			# ensure there is significant movement in the
-			# y-direction
-			if np.abs(dY) > 20:
-				dirY = "North" if np.sign(dY) == 1 else "South"
-
-			# handle when both directions are non-empty
-			if dirX != "" and dirY != "":
-				direction = "{}-{}".format(dirY, dirX)
-
-			# otherwise, only one direction is non-empty
-			else:
-				direction = dirX if dirX != "" else dirY
 
 		# otherwise, compute the thickness of the line and
 		# draw the connecting lines
 		thickness = int(np.sqrt(args["buffer"] / float(i + 1)) * 2.5)
 		cv2.line(frame, pts[i - 1], pts[i], (0, 0, 255), thickness)
 
-	# show the movement deltas and the direction of movement on
-	# the frame
-	cv2.putText(frame, direction, (10, 30), cv2.FONT_HERSHEY_SIMPLEX,
-		0.65, (0, 0, 255), 3)
-	cv2.putText(frame, "dx: {}, dy: {}".format(dX, dY),
-		(10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX,
-		0.35, (0, 0, 255), 1)
-
-	# show the frame to our screen and increment the frame counter
+	# show the frame to our screen
 	cv2.imshow("Frame", frame)
 	key = cv2.waitKey(1) & 0xFF
-	counter += 1
+	
+	# write the frame
+	video.write(frame)
 
-	# Print out coordinates to confirm that we are tracking
-	print 'location is x=',x,', y=',y
-
+	text_file.close()
+	time.sleep(0.07725)
+	
 	# if the 'q' key is pressed, stop the loop
 	if key == ord("q"):
 		break
 
 # cleanup the camera and close any open windows
 camera.release()
+video.release()
 cv2.destroyAllWindows()
+text_file.close()

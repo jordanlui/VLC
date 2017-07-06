@@ -12,6 +12,7 @@ from scipy import optimize
 from numpy import *
 from scipy import optimize
 from scipy import stats
+import os
 
 def gaussian(height, center_x, center_y, width_x, width_y):
     """Returns a gaussian function with the given parameters"""
