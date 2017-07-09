@@ -25,11 +25,11 @@ import os, glob, re, csv
 
 # Parameters
 # Input file directory
-filename = 'circle_fast_2.tdms'
-dir_in = "../Data/june27/"
+filename = 'db_circular_1.tdms'
+dir_in = "../Data/july6/"
 path_in = dir_in + filename
 # Output file parameters
-dir_out = '../analysis/june27/'
+dir_out = '../Data/july6/analysis/'
 fileout = filename[:-5] + '.csv' # output file name of the averages file, named based on input file. Clipped to remove TDMS filename
 path_out = os.path.join(dir_out,fileout)
 
@@ -76,7 +76,7 @@ def tdmsfuncjun(filename):
     c3 = tdms_file.object('Untitled','40khz (Filtered)').data
     c4 = tdms_file.object('Untitled','100khz (Filtered)').data
     
-    # Load time data and coord data. More painful
+    # Load time data and coord data. 
     x = tdms_file.object('Untitled','Resampled').data
     y = tdms_file.object('Untitled','Resampled 1').data
     t = tdms_file.object('Untitled','1khz (Filtered)').time_track()
@@ -93,15 +93,25 @@ def tdmsfuncjun(filename):
     
     print 'length compare', len(x), len(c1)
     # Fix jagged edge issue, where size of x,y column often shorter than the photodiode data
-    if len(x) < len(c1):
-        # The fix jagged edge issue
-        jagged = len(x)
+    if len(x) < len(c1) or len(y) < len(c1):
+        # The fix jagged edge issue. Sometimes even x,y column are different length.
+        print 'jagged edge found'
+        
+        jagged = min(len(x),len(y))
         c1 = c1[:jagged]
         c2 = c2[:jagged]
         c3 = c3[:jagged]
         c4 = c4[:jagged]
         t = t[:jagged]
+        x = x[:jagged]
+        y = y[:jagged]
+#        print len(x),len(y),len(t),len(c1),len(c2),len(c3),len(c4)
         
+    # Desired data formatting.
+    # Round coordinate values, since the re-sampling is probably introducing more error
+#    x = np.round(x,decimals=0)
+#    y = np.round(y,decimals=0)
+    
     # Format as a new array
     f = np.concatenate((t,x,y,c1,c2,c3,c4), axis=1)
     

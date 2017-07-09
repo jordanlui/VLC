@@ -5,6 +5,9 @@ Created on Tue Jun 27 14:46:21 2017
 @author: Jordan
 
 Trying linear regression models out
+
+Need to improve abstraction in this code like my other code
+
 """
 
 from __future__ import division
@@ -16,12 +19,13 @@ from sklearn import datasets
 from sklearn.model_selection import cross_val_predict
 from sklearn import linear_model
 import matplotlib.pyplot as plt
+from algorithm import dataprep
 
 # Constants and parameters
-path ='../Analysis/camera_integration/' # Main working directory
+path ='../Data/july6/analysis/' # Main working directory
 segment = 0.3 # Amount split for training
 
-output_dir = '../Analysis/may29/' # Directory for results output
+output_dir = path # Directory for results output
 output_file = 'analysis.csv' # Analysis Summary file
 output_path = os.path.join(output_dir,output_file)
 
@@ -63,6 +67,7 @@ print 'Coefficients: \n', regr.coef_
 
 # Mean Error
 print('MSE: %.2f' % np.mean((regr.predict(X_test) - y_test) **2))
+print('Variance: %.2f' %regr.score(X_test,y_test))
 
 # Plot outputs
 #plt.scatter(X_test, y_test, color='black')
