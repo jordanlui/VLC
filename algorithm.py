@@ -23,6 +23,7 @@ print 'Start of script'
 # Libraries
 import numpy as np
 import os, random
+from dataprep import dataprep
 
 #from trilateration import trilateration # This is a tr
 
@@ -48,33 +49,34 @@ database = np.genfromtxt(os.path.join(path,"xavg.csv"),delimiter=',') # The data
 #database[:,2:] = (database[:,2:] - database[:,2:].min(0)) / database[:,2:].ptp(0)
 
 # Functions
-def dataprep(x,seed,segment,twidth):
-    # Takes our x matrix and shuffles, segments, and extracts label values
-    # Shuffle data
-    random.seed(a=seed)
-    x = np.asarray(random.sample(x,len(x)))
-    
-    # Find index at which we segment our data    
-    segindex = int(len(x)*segment)
-    
-    # Segment our data (May29 data set formatting rules)
-    
-    # Grab X values. 
-    #twidth = 2 # We have two columns of label data in front of x matrix from May 29
-    x_train = x[:segindex,twidth:]
-    x_test = x[segindex:,twidth:]
-    
-    # Segment T values 
-    t_train = x[:segindex,:twidth]
-    t_test = x[segindex:,:twidth]
-    
-    # Reshape t to proper array if twidth was 1, so we are not dealing with list
-    if twidth == 1:
-        t_train = np.reshape(t_train,(t_train.shape[0],twidth))
-        t_test = np.reshape(t_test,(t_test.shape[0],twidth))
-
-    return x_train,x_test,t_train,t_test
-    
+#def dataprep(x,seed,segment,twidth):
+#    # Takes our x matrix and shuffles, segments, and extracts label values
+#    # Takes t values based on twidth. Assumes labels start in column 0.
+#    # Shuffle data based on the random seed input
+#    random.seed(a=seed)
+#    x = np.asarray(random.sample(x,len(x)))
+#    
+#    # Find index at which we segment our data    
+#    segindex = int(len(x)*segment)
+#    
+#    # Segment our data (May29 data set formatting rules)
+#    
+#    # Grab X values. 
+#    #twidth = 2 # We have two columns of label data in front of x matrix from May 29
+#    x_train = x[:segindex,twidth:]
+#    x_test = x[segindex:,twidth:]
+#    
+#    # Segment T values 
+#    t_train = x[:segindex,:twidth]
+#    t_test = x[segindex:,:twidth]
+#    
+#    # Reshape t to proper array if twidth was 1, so we are not dealing with list
+#    if twidth == 1:
+#        t_train = np.reshape(t_train,(t_train.shape[0],twidth))
+#        t_test = np.reshape(t_test,(t_test.shape[0],twidth))
+#
+#    return x_train,x_test,t_train,t_test
+#    
 def min_in_list(column):
     # Finds index of minimum value in a list (no interpolation)
     # Initialize empty search variable for the 
