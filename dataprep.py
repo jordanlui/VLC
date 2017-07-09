@@ -34,3 +34,8 @@ def dataprep(x,seed,segment,twidth):
 
     return x_train,x_test,t_train,t_test
     
+def unison_shuffled_copies(a, b):
+    # Shuffles to arrays together in unison
+    assert len(a) == len(b)
+    p = np.random.permutation(len(a))
+    return a[p], b[p]

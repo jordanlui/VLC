@@ -16,29 +16,24 @@ from __future__ import division
 print 'Start of script'
 # Libraries
 import numpy as np
-import os, random
-from sklearn import datasets
-from sklearn.model_selection import cross_val_predict
+import os
+#from sklearn import datasets
+#from sklearn.model_selection import cross_val_predict
 from sklearn import linear_model
-import matplotlib.pyplot as plt
-from dataprep import dataprep
+#import matplotlib.pyplot as plt
+from dataprep import dataprep, unison_shuffled_copies
 
 # Constants and parameters
 path ='../Data/july6/analysis/' # Main working directory
-segment = 0.3 # Amount split for training
-seed = 0
-twidth = 2
+segment = 0.2 # Amount split for training
+seed = 0 # Random seed value
+twidth = 2 # This is the number of label "t" columns in the front of the x-matrix
 
 output_dir = path # Directory for results output
 output_file = 'analysis.csv' # Analysis Summary file
 output_path = os.path.join(output_dir,output_file)
 
-# Functions
-def unison_shuffled_copies(a, b):
-    # Shuffles to arrays together in unison
-    assert len(a) == len(b)
-    p = np.random.permutation(len(a))
-    return a[p], b[p]
+# Functions are in dataprep.py
 
 # Load data
 x = np.genfromtxt(os.path.join(path,"x.csv"),delimiter=',') # The real x data
