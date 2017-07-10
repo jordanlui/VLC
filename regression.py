@@ -44,6 +44,10 @@ x = x[:,1:] # Cut out time values for now
 #t1 = np.genfromtxt(os.path.join(path,"t.csv"),delimiter=',') # The real x data
 [x_train, x_test, t_train, t_test] = dataprep(x,seed,segment,twidth)
 
+# Round t values since the sampling is troublesome
+t_train = np.round(t_train,decimals=0)
+t_test = np.round(t_test,decimals=0)
+
 
 # Model
 regr = linear_model.LinearRegression()

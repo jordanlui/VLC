@@ -11,6 +11,8 @@ import imutils
 import cv2
 import time
 
+
+
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video",
@@ -21,18 +23,23 @@ args = vars(ap.parse_args())
 
 # Parameters for operation
 camera_address = 0 # 1 for the USB webcam, 0 for the onboard webcam
+radius_min = 4 # Minimum radius size of tracking circle to consider an object
 
 # define the lower and upper boundaries of the "green"
 # ball in the HSV (RGB??) color space, then initialize the
 # list of tracked points
+
+# HSV Values for table covered with white poster, LED Lighting. 20170710
+greenLower = (25,108,15)
+greenUpper = (65,255,57)
 
 # HSV Values for green bottle cap. Optimized for the lamp lighting
 # greenLower = (38,70,61)
 # greenUpper = (112,250,217)
 
 # HSV Values for table covered with white poster. 20170627
-greenLower = (49,80,30)
-greenUpper = (107,255,94)
+# greenLower = (49,80,30)
+# greenUpper = (107,255,94)
 
 # Bounds for the unlit table are below, but will be less accurate
 # greenLower = (66,91,23)	
@@ -117,7 +124,7 @@ while True:
 		text_file.write("{X: %.3f, Y: %.3f} \n" % (x, y))
 
 		# only proceed if the radius meets a minimum size
-		if radius > 10:
+		if radius > radius_min:
 			# draw the circle and centroid on the frame,
 			# then update the list of tracked points
 			cv2.circle(frame, (int(x), int(y)), int(radius),

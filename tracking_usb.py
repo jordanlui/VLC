@@ -31,8 +31,8 @@ camera_address = 0 # 1 for the USB webcam, 0 for the onboard webcam
 # greenUpper = (112,250,217)
 
 # HSV Values for table covered with white poster. 20170627
-greenLower = (49,80,30)
-greenUpper = (107,255,94)
+greenLower = (25,134,15)
+greenUpper = (101,255,57)
 
 # Bounds for the unlit table are below, but will be less accurate
 # greenLower = (66,91,23)	
