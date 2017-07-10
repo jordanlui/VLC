@@ -28,6 +28,7 @@ path ='../Data/july6/analysis/' # Main working directory
 segment = 0.2 # Amount split for training
 seed = 0 # Random seed value
 twidth = 2 # This is the number of label "t" columns in the front of the x-matrix
+scale_table = 1.333 # This is the scaling factor of table at 805mm sys height. Units are pixels/mm
 
 output_dir = path # Directory for results output
 output_file = 'analysis.csv' # Analysis Summary file
@@ -35,27 +36,53 @@ output_path = os.path.join(output_dir,output_file)
 
 # Functions are in dataprep.py
 
+#%% Main Script
 # Load data
 x = np.genfromtxt(os.path.join(path,"x.csv"),delimiter=',') # The real x data
 x = x[:,1:] # Cut out time values for now
-#training_segment = int(segment*len(x))
 
-
-#t1 = np.genfromtxt(os.path.join(path,"t.csv"),delimiter=',') # The real x data
 [x_train, x_test, t_train, t_test] = dataprep(x,seed,segment,twidth)
 
-# Round t values since the sampling is troublesome
+# Round t values since the time sampling is troublesome
 t_train = np.round(t_train,decimals=0)
 t_test = np.round(t_test,decimals=0)
 
 
-# Model
+#%% Model
 regr = linear_model.LinearRegression()
 regr.fit(x_train, t_train)
 
+# Results
 # Coefficients of fit
 #print 'Coefficients: \n', regr.coef_
-
+coeff = regr.coef_
 # Mean Error
 print('MSE: %.2f' % np.mean((regr.predict(x_test) - t_test) **2))
 print('Variance: %.2f' %regr.score(x_test,t_test))
+
+# Try Euclidean distance error on the system predictions
+x_pred = regr.predict(x_test)
+diff = (x_pred - t_test)**2
+diff = np.sum(diff,axis=1)
+diff = np.sqrt(diff)
+error_mean = np.mean(diff) # Per pixel error mean
+print 'mean error is',error_mean/scale_table,'mm'
+
+
+##%% Individual predictions
+##xx,tt = regr.predict(x_train[0:2,:])
+##print np.dot(coeff,np.transpose(x_train[0,:]))
+#error = []
+#for i in range(0,len(x_test)):
+#    xx,yy = t_test[i,:] # Real values
+#    coord = x_test[i,:] # Coordinates
+#    coord = np.reshape(coord,(4,1)).transpose()
+#    px,py = np.dot(coeff,np.transpose(coord)) # Prediction. But this seems wrong.
+#    px,py = regr.predict(coord)
+#    diff = np.sqrt((xx - px)**2 + (yy-py)**2) # Euclidean distance between points
+#    error.append(diff)
+#
+## Average of result
+#print 'mean value is',np.mean(error)
+#print 'max is',np.max(error)
+#print 'min is',np.min(error)
