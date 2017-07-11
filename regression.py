@@ -20,12 +20,12 @@ import os
 #from sklearn import datasets
 #from sklearn.model_selection import cross_val_predict
 from sklearn import linear_model
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 from dataprep import dataprep, unison_shuffled_copies
 
 # Constants and parameters
 path ='../Data/july6/analysis/' # Main working directory
-segment = 0.2 # Amount split for training
+segment = 0.9 # Amount split for training
 seed = 0 # Random seed value
 twidth = 2 # This is the number of label "t" columns in the front of the x-matrix
 scale_table = 1.333 # This is the scaling factor of table at 805mm sys height. Units are pixels/mm
@@ -52,7 +52,7 @@ t_test = np.round(t_test,decimals=0)
 regr = linear_model.LinearRegression()
 regr.fit(x_train, t_train)
 
-# Results
+#%% Results
 # Coefficients of fit
 #print 'Coefficients: \n', regr.coef_
 coeff = regr.coef_
@@ -62,12 +62,20 @@ print('Variance: %.2f' %regr.score(x_test,t_test))
 
 # Try Euclidean distance error on the system predictions
 x_pred = regr.predict(x_test)
-diff = (x_pred - t_test)**2
-diff = np.sum(diff,axis=1)
-diff = np.sqrt(diff)
+diff = (x_pred - t_test)**2 # Square errors
+diff = np.sqrt(np.sum(diff,axis=1)) # Sum the square error and sqrt. Euclidean distance error
 error_mean = np.mean(diff) # Per pixel error mean
 print 'mean error is',error_mean/scale_table,'mm'
+diff_mm = diff/scale_table # This is the mm value error
+print 'min error (mm) is',np.min(diff_mm),'max error',np.max(diff_mm),'median',np.median(diff_mm)
 
+# Histogram of analysis
+#np.histogram(diff_mm,bins=10)
+plt.hist(diff_mm,bins='auto')
+plt.title('Histogram of error (mm)')
+plt.ylabel('Occurrences')
+plt.xlabel('Error value (mm)')
+plt.show()
 
 ##%% Individual predictions
 ##xx,tt = regr.predict(x_train[0:2,:])
