@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 from dataprep import dataprep, unison_shuffled_copies
 
 # Constants and parameters
-path ='../Data/july6/analysis/' # Main working directory
+path ='../Data/july11/analysis/' # Main working directory
 segment = 0.9 # Amount split for training
 seed = 0 # Random seed value
 twidth = 2 # This is the number of label "t" columns in the front of the x-matrix
@@ -43,7 +43,17 @@ x = x[:,1:] # Cut out time values for now
 
 [x_train, x_test, t_train, t_test] = dataprep(x,seed,segment,twidth)
 
-# Round t values since the time sampling is troublesome
+# Load second data to compare
+x2 = np.genfromtxt(os.path.join(path,"x2.csv"),delimiter=',') # The real x data
+x2 = x2[:,1:] # Cut out time values for now
+
+[x_train2, x_test2, t_train2, t_test2] = dataprep(x2,seed,segment,twidth)
+
+#  Change up so we train one, test other
+x_test = x_test2
+t_test = t_test2
+
+# Round t values (coordinates) since the time sampling is troublesome
 t_train = np.round(t_train,decimals=0)
 t_test = np.round(t_test,decimals=0)
 

@@ -25,11 +25,11 @@ import os, glob, re, csv
 
 # Parameters
 # Input file directory
-filename = 'dynamic_random_3.tdms'
-dir_in = "../Data/july11/"
+filename = 'dynamic_1.tdms'
+dir_in = "../Data/july10/"
 path_in = dir_in + filename
 # Output file parameters
-dir_out = '../Data/july11/analysis/'
+dir_out = '../Data/july10/analysis'
 fileout = filename[:-5] + '.csv' # output file name of the averages file, named based on input file. Clipped to remove TDMS filename
 path_out = os.path.join(dir_out,fileout)
 

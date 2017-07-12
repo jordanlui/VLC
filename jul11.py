@@ -48,13 +48,20 @@ def make_contour(x,y,z,interp_method='nearest',levels=5):
     return fig
 #%% Main
 
-
-xx = np.genfromtxt('../Data/july11/analysis/dynamic_random_2.csv',delimiter=',')
+# Load data
+x_all=[]
+x_all.append(np.genfromtxt('../Data/july11/analysis/dynamic_random_2.csv',delimiter=','))
+x_all.append(np.genfromtxt('../Data/july11/analysis/dynamic_random_3.csv',delimiter=','))
+x_all.append(np.genfromtxt('../Data/july10/analysis/dynamic_2.csv',delimiter=','))
+x_all.append(np.genfromtxt('../Data/july10/analysis/dynamic_1.csv',delimiter=','))
+x_all.append(np.genfromtxt('../Data/july10/analysis/dynamic_3.csv',delimiter=','))
+# Combine with others
+xx = np.vstack(x_all)
 m = len(xx)
 segment = 0.2
 #np.random.shuffle(xx)
 #xx = xx[0:int(segment*m),:]
-xx = xx[::25]
+xx = xx[::150]
 
 # Normalize our power data
 maxpower = np.max(xx[:,3:])
@@ -87,10 +94,11 @@ plt.title('x and y coordinate changes with time')
 #%% Contour Plot and Surface plot
 # Surface plot is probably more applicable
 #f2, (ax21, ax22) = plt.subplots(1,2)
-fig = make_contour(x,y,c1,interp_method='nearest',levels=5)
-make_contour(x,y,c2,interp_method='nearest',levels=5)
-make_contour(x,y,c3,interp_method='nearest',levels=5)
-fig = make_contour(x,y,c4,interp_method='nearest',levels=5)
+interp_method = 'nearest' # Interpolation method used for griddata function
+make_contour(x,y,c1,interp_method=interp_method,levels=5)
+make_contour(x,y,c2,interp_method=interp_method,levels=5)
+make_contour(x,y,c3,interp_method=interp_method,levels=5)
+make_contour(x,y,c4,interp_method=interp_method,levels=5)
 #fig = plt.figure()
 ##ax1 = fig.add_subplot(111,projection='3d')
 #
