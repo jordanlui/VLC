@@ -25,13 +25,13 @@ import os, glob, re, csv
 
 # Parameters
 # Input file directory
-filename = 'dynamic_1.tdms'
-dir_in = "../Data/july10/"
-path_in = dir_in + filename
+#filename = '1khz_1dtranslation_1.tdms'
+#dir_in = "../Data/july14/"
+#path_in = dir_in + filename
 # Output file parameters
-dir_out = '../Data/july10/analysis'
-fileout = filename[:-5] + '.csv' # output file name of the averages file, named based on input file. Clipped to remove TDMS filename
-path_out = os.path.join(dir_out,fileout)
+#dir_out = dir_in + 'analysis'
+#fileout = filename[:-5] + '.csv' # output file name of the averages file, named based on input file. Clipped to remove TDMS filename
+#path_out = os.path.join(dir_out,fileout)
 
 
 def tdmsfuncapr14(filename):
@@ -94,7 +94,7 @@ def tdmsfuncjun(filename):
     print 'length compare', len(x), len(c1)
     # Fix jagged edge issue, where size of x,y column often shorter than the photodiode data
     if len(x) < len(c1) or len(y) < len(c1):
-        # The fix jagged edge issue. Sometimes even x,y column are different length.
+        # The fix jagged edge issuesue. Sometimes even x,y column are different length.
         print 'jagged edge found'
         
         jagged = min(len(x),len(y))
@@ -117,13 +117,40 @@ def tdmsfuncjun(filename):
     
     # Return result
     return f   
+def runTDMS(dir_in,file):
+    # Run this file from a function
+    # Grab the filename
+    print 'running the runTDMS Function'
+    path_in = dir_in + file
+    dir_out = dir_in + 'analysis/'
+    fileout = file[:-5] + '.csv'
+#    print path_in,fileout,dir_in,dir_out
+#    print os.path.join(dir_out,fileout)
+#    print 'Run TMDS File'
+    f = tdmsfuncjun(path_in)
+    with open(os.path.join(dir_out,fileout),'wb') as file:
+        np.savetxt(file,f,fmt='%s',delimiter=',')
+def tempRun():
+    print 'temp run'
+    dir_in = '../Data/july14/'
+    file = 'integrated_randommove_4.tdms'
+    runTDMS(dir_in,file)
+
+# Try to process all file in folder
+dir_in = '../Data/july14/corners_elevated/'
+filelist = glob.glob(dir_in +'*.tdms')
+for file in filelist:
+    runTDMS(dir_in,os.path.basename(file))
+
+#tempRun()
+
 
 # Main code
-print 'Testing new code June 2017'
-f = tdmsfuncjun(path_in)
-print 'function finished'
-
-# Save results to file
-with open(os.path.join(dir_out,fileout),'wb') as file:
-        np.savetxt(file,f,fmt='%s',delimiter=',')
+#print 'Testing new code June 2017'
+#f = tdmsfuncjun(path_in)
+#print 'function finished'
+#
+## Save results to file
+#with open(os.path.join(dir_out,fileout),'wb') as file:
+#        np.savetxt(file,f,fmt='%s',delimiter=',')
     
