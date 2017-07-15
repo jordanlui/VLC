@@ -23,6 +23,7 @@ from sklearn import linear_model
 import matplotlib.pyplot as plt
 from dataprep import dataprep, unison_shuffled_copies
 
+
 # Constants and parameters
 path ='../Data/july14/corners2/analysis/' # Main working directory
 segment = 0.9 # Amount split for training

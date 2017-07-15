@@ -132,25 +132,14 @@ def runTDMS(dir_in,file):
         np.savetxt(file,f,fmt='%s',delimiter=',')
 def tempRun():
     print 'temp run'
-    dir_in = '../Data/july14/'
-    file = 'integrated_randommove_4.tdms'
-    runTDMS(dir_in,file)
+    dir_in = '../Data/july14/static/'
+    filelist = glob.glob(dir_in +'*.tdms')
+    for file in filelist:
+        runTDMS(dir_in,os.path.basename(file))
 
 # Try to process all file in folder
-dir_in = '../Data/july14/corners_elevated/'
-filelist = glob.glob(dir_in +'*.tdms')
-for file in filelist:
-    runTDMS(dir_in,os.path.basename(file))
-
-#tempRun()
 
 
-# Main code
-#print 'Testing new code June 2017'
-#f = tdmsfuncjun(path_in)
-#print 'function finished'
-#
-## Save results to file
-#with open(os.path.join(dir_out,fileout),'wb') as file:
-#        np.savetxt(file,f,fmt='%s',delimiter=',')
-    
+
+#%% Main code
+# Since this script is imported into other modules, use tempRun() for single instances.
