@@ -45,17 +45,22 @@ def fitGaussian(x,y):
         return a*exp(-(x-x0)**2/(2*sigma**2))
     
     popt,pcov = curve_fit(gaus,x,y,p0=[a,mean,sigma])
+    ypred = gaus(x,*popt)
+    SST = np.sum( (y-np.mean(y))**2)
+    SSR = np.sum( (y-ypred)**2 )
+    R2 = 1 - SSR/SST
+    
     
     plt.figure()
     plt.plot(x,y,'b+:',label='data')
-    plt.plot(x,gaus(x,*popt),'ro-',label='fit')
+    plt.plot(x,ypred,'ro-',label='fit')
     plt.legend(bbox_to_anchor=(1, 1),
                bbox_transform=plt.gcf().transFigure)
     plt.title('Guassian fit')
     plt.xlabel('Distance')
     plt.ylabel('Signal power')
     plt.show()
-    return popt
+    return popt, ypred, R2
 
 
 # Empty arrays
@@ -124,51 +129,88 @@ def makeFFT(y):
     ax.plot(xf, 10 * np.log10(2.0/N * np.abs(yf[:N//2])))
     plt.title('FFT, y axis log scale')
     plt.show()
-    return yf
+    return xf,yf
 
+def running_mean(x, N):
+    cumsum = np.cumsum(np.insert(x, 0, 0)) 
+    return (cumsum[N:] - cumsum[:-N]) / N 
+def smoothing_window(x,N):
+    # Performs simple moving window smoothing
+    return 0
     
+def calcSma(data, smaPeriod):
+    j = next(i for i, x in enumerate(data) if x is not None)
+    our_range = range(len(data))[j + smaPeriod - 1:]
+    empty_list = [None] * (j + smaPeriod - 1)
+    sub_result = [np.mean(data[i - smaPeriod + 1: i + 1]) for i in our_range]
+
+    return np.array(sub_result)
+
+
 # Ended
         
 #%% Main
-#loadFiles(filelist)
+
 
         
-#%% Examine individual data files
+#%% Examine individual Static data files
 path = '../Data/july14/static/analysis/'
 file = '1khz_static_1.csv'
 f = np.genfromtxt(path+file,delimiter=',')
 
 # Slice the data to take a close look
 start = 0
-end = 1e3
+end = 2e3
+#f = f[start:end,:]
 
-f = f[start:end,:]
 # Stat analysis on static (non moving) tests
 t,x,y,c1,c2,c3,c4 = zip(*f)
 t,x,y,c1,c2,c3,c4 = np.array((t,x,y,c1,c2,c3,c4))
 
 stats = stats(f) # Compute stats (min,ma,mean,stdev,etc) on data
+# max deviation on c1
+maxdev = np.max(np.abs(c1 - np.mean(c1)))
+print 'max deviation from mean is', maxdev
 
-plt.figure()
-plt.plot(t,c1,'x')
-plt.plot(t,c2,'o')
+f, axarr = plt.subplots(3, sharex = True)
+axarr[0].plot(t,c1,'x')
+#plt.plot(t,c2,'o')
+axarr[0].set_title('Data vs time, no smoothing')
+
+
+# Try smoothing and compare
+N = 100 # Number of running average points
+c1_smooth = running_mean(c1,N)
+axarr[1].plot(t[:len(c1_smooth)], c1_smooth, 'x')
+title = 'Data vs time, Cumulative average on %d points' %N
+axarr[1].set_title(title)
+
+N = 100
+c1_smooth2 = calcSma(c1,N)
+#c1_smooth2 = np.asarray(c1_smooth2)
+axarr[2].plot(t[:len(c1_smooth2)], c1_smooth2, 'x')
+title = 'Data vs time, Simple moving average over %d points' %N
+axarr[2].set_title(title)
+
+print 'data mean ', np.mean(c1),'relative stdev before is ',np.std(c1)/np.mean(c1), 'stdev cum avg is', np.std(c1_smooth)/np.mean(c1_smooth), 'and SMA stdev is ', np.std(c1_smooth2)/np.mean(c1_smooth2)
 
 # Fourier Analysis
-#fft = np.fft.fft(c1)
-#plt.figure()
-#plt.plot(fft)
-
-# Copy pasta
-#plt.figure()
 y=c4
-yf = makeFFT(y)
+xf,yf = makeFFT(y)
+#%% Split and look
+xf2=xf[0:10]
+yf2=yf[0:10]
+N = len(y)
+plt.figure()
+plt.plot(xf2, yf2 )
+plt.title('FFT on subset of data')
 
 
 
-
-#%% Fit a Gaussian
-#popt = fitGaussian(dist,c1) # fit gaussian, output parameters, and plot
-
+#%% Fit a Gaussian on the movement data
+#loadFiles(filelist)
+#popt, ypred, R2 = fitGaussian(dist,c3) # fit gaussian, output parameters, and plot
+#print popt, R2
 #%% Plot results
 #plt.figure()
 #plt.plot(dist,c1,'o')

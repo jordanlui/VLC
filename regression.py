@@ -77,7 +77,23 @@ def model(x_train,x_test,t_train,t_test):
     
     return error_mean, error_min, error_max, error_med
     
-
+def running_mean(x, N):
+    if x.shape[1] > 1 :
+        # If x is not just a vector we need to complete this column wise
+        newx = []
+        for i in range(0,x.shape[1]):
+            col = x[:,i]
+            cumsum = np.cumsum(np.insert(col, 0, 0)) 
+            col =  (cumsum[N:] - cumsum[:-N]) / N
+#            col = np.reshape(col, (len(col),1))
+#            newx = np.hstack((newx,col))
+            newx.append(col)
+        x = np.asarray(newx).transpose()
+        
+    else:
+        cumsum = np.cumsum(np.insert(x, 0, 0)) 
+        x  = (cumsum[N:] - cumsum[:-N]) / N
+    return x
 # Functions are in dataprep.py
 
 #%% Main Script
@@ -101,13 +117,29 @@ for i in range(0,numfiles): # Iterate through and generate train and test data
     t_test = x_test[:,1:3]
     x_test = x_test[:,3:]
     
+    # Try smoothing data
+    N = 250 # Smooth on x values. Smoothing on 50 points gives us 20 ms data
+    newx_test = running_mean(x_test,N) # 
+    t_test = t_test[N/2:len(x_test)-N/2+1] # Note a tweak for error handling may be required since running mean can give varying length output
+    x_test = newx_test
+    
     for apath in otherpaths:
         xtemp = np.genfromtxt(apath,delimiter=',')
+        
+        # Data smoothing on training data
+        xtemp_sigdata = xtemp[:,3:]                         # Grab signal data only
+        xtemp_sigdata = running_mean(xtemp_sigdata,N)       # Smooth signal data
+        xtemp = xtemp[N/2:len(xtemp)-N/2+1]                 # Resize array after smoothing
+        xtemp[:,3:] = xtemp_sigdata                         # Put back into array
+        
+        
         x_train.append(xtemp)
         
     x_train = np.vstack(x_train)
     t_train = x_train[:,1:3]
     x_train = x_train[:,3:]
+    
+    
     
     # Run model
     error_mean, error_min, error_max, error_med = model(x_train,x_test,t_train,t_test)
@@ -118,54 +150,4 @@ for i in range(0,numfiles): # Iterate through and generate train and test data
     
 # Summarize results
 print e_mean
-#%% Old stuff
-# Now stack files properly
-
-#[x_train, x_test, t_train, t_test] = dataprep(x,seed,segment,twidth)
-#
-## Load second data to compare
-#x2 = np.genfromtxt(filelist[0],delimiter=',') # The real x data
-#x2 = x2[:,1:] # Cut out time values for now
-#
-#[x_train2, x_test2, t_train2, t_test2] = dataprep(x2,seed,segment,twidth)
-#
-##  Change up so we train one, test other
-#x_test = x_test2
-#t_test = t_test2
-
-
-
-##%% Model
-## Round t values (coordinates) since the coord sampling is troublesome
-#t_train = np.round(t_train,decimals=0)
-#t_test = np.round(t_test,decimals=0)
-#
-#regr = linear_model.LinearRegression()
-#regr.fit(x_train, t_train)
-#
-##%% Results
-## Coefficients of fit
-##print 'Coefficients: \n', regr.coef_
-#coeff = regr.coef_
-## Mean Error
-#print('MSE: %.2f' % np.mean((regr.predict(x_test) - t_test) **2))
-#print('Variance: %.2f' %regr.score(x_test,t_test))
-#
-## Try Euclidean distance error on the system predictions
-#x_pred = regr.predict(x_test)
-#diff = (x_pred - t_test)**2 # Square errors
-#diff = np.sqrt(np.sum(diff,axis=1)) # Sum the square error and sqrt. Euclidean distance error
-#error_mean = np.mean(diff) # Per pixel error mean
-#print 'mean error is',error_mean/scale_table,'mm'
-#diff_mm = diff/scale_table # This is the mm value error
-#print 'min error (mm) is',np.min(diff_mm),'max error',np.max(diff_mm),'median',np.median(diff_mm)
-#
-## Histogram of analysis
-##np.histogram(diff_mm,bins=10)
-#plt.figure()
-#plt.hist(diff_mm,bins='auto')
-#title = 'Histogram of error (mm)'
-#plt.title(title)
-#plt.ylabel('Occurrences')
-#plt.xlabel('Error value (mm)')
-#plt.show()
+print 'Overall mean error is ', np.mean(e_mean)

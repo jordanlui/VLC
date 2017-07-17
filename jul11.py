@@ -5,6 +5,11 @@ Created on Tue Jul 11 17:08:15 2017
 @author: Jordan
 
 Looking at data results carefully in code and plots
+
+Examining moving data and generating contour plots
+Note data smoothing required
+
+
 """
 from __future__ import division
 import numpy as np
