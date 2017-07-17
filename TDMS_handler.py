@@ -120,7 +120,7 @@ def tdmsfuncjun(filename):
 def runTDMS(dir_in,file):
     # Run this file from a function
     # Grab the filename
-    print 'running the runTDMS Function'
+    print 'running the runTDMS Function on %s' %file
     path_in = dir_in + file
     dir_out = dir_in + 'analysis/'
     fileout = file[:-5] + '.csv'
@@ -132,7 +132,7 @@ def runTDMS(dir_in,file):
         np.savetxt(file,f,fmt='%s',delimiter=',')
 def tempRun():
     print 'temp run'
-    dir_in = '../Data/july14/static/'
+    dir_in = '../Data/july14/translation1D/'
     filelist = glob.glob(dir_in +'*.tdms')
     for file in filelist:
         runTDMS(dir_in,os.path.basename(file))

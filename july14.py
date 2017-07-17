@@ -14,7 +14,7 @@ from __future__ import division
 import glob, os, re
 import numpy as np
 import matplotlib.pyplot as plt
-from TDMS_handler import tdmsfuncjun
+from TDMS_handler import tdmsfuncjun, tempRun
 from natsort import natsorted
 from scipy.optimize import curve_fit
 from scipy import asarray as ar,exp
@@ -146,7 +146,29 @@ def calcSma(data, smaPeriod):
 
     return np.array(sub_result)
 
-
+def smoothingPlot(t,x,N1=50,N2=50):
+    # Smooth data and plot it for comparison
+    f, axarr = plt.subplots(3, sharex = True)
+    axarr[0].plot(t,x,'x')
+    axarr[0].set_title('Data vs time, no smoothing')
+    
+    
+    # Try smoothing and compare
+#    N1 = 100 # Number of running average points
+    x_cum = running_mean(x,N1)
+    axarr[1].plot(t[:len(x_cum)], x_cum, 'x')
+    title = 'Data vs time, Cumulative average on %d points' %N1
+    axarr[1].set_title(title)
+    
+#    N2 = 500
+    x_sma = calcSma(x,N2)
+    #c1_smooth2 = np.asarray(c1_smooth2)
+    axarr[2].plot(t[:len(x_sma)], x_sma, 'x')
+    title = 'Data vs time, Simple moving average over %d points' %N2
+    axarr[2].set_title(title)
+    
+    print 'data mean ', np.mean(x),'relative stdev before is ',np.std(x)/np.mean(x), 'stdev cum avg is', np.std(x_cum)/np.mean(x_cum), 'and SMA stdev is ', np.std(x_sma)/np.mean(x_sma)
+    return x_cum, x_sma
 # Ended
         
 #%% Main
@@ -156,6 +178,7 @@ def calcSma(data, smaPeriod):
 #%% Examine individual Static data files
 path = '../Data/july14/static/analysis/'
 file = '1khz_static_1.csv'
+#file = '1khz_1dtranslation_1'
 f = np.genfromtxt(path+file,delimiter=',')
 
 # Slice the data to take a close look
@@ -172,29 +195,30 @@ stats = stats(f) # Compute stats (min,ma,mean,stdev,etc) on data
 maxdev = np.max(np.abs(c1 - np.mean(c1)))
 print 'max deviation from mean is', maxdev
 
-f, axarr = plt.subplots(3, sharex = True)
-axarr[0].plot(t,c1,'x')
-#plt.plot(t,c2,'o')
-axarr[0].set_title('Data vs time, no smoothing')
-
-
-# Try smoothing and compare
-N = 100 # Number of running average points
-c1_smooth = running_mean(c1,N)
-axarr[1].plot(t[:len(c1_smooth)], c1_smooth, 'x')
-title = 'Data vs time, Cumulative average on %d points' %N
-axarr[1].set_title(title)
-
-N = 100
-c1_smooth2 = calcSma(c1,N)
-#c1_smooth2 = np.asarray(c1_smooth2)
-axarr[2].plot(t[:len(c1_smooth2)], c1_smooth2, 'x')
-title = 'Data vs time, Simple moving average over %d points' %N
-axarr[2].set_title(title)
-
-print 'data mean ', np.mean(c1),'relative stdev before is ',np.std(c1)/np.mean(c1), 'stdev cum avg is', np.std(c1_smooth)/np.mean(c1_smooth), 'and SMA stdev is ', np.std(c1_smooth2)/np.mean(c1_smooth2)
-
-# Fourier Analysis
+#f, axarr = plt.subplots(3, sharex = True)
+#axarr[0].plot(t,c1,'x')
+#axarr[0].set_title('Data vs time, no smoothing')
+#
+#
+## Try smoothing and compare
+#N = 100 # Number of running average points
+#c1_smooth = running_mean(c1,N)
+#axarr[1].plot(t[:len(c1_smooth)], c1_smooth, 'x')
+#title = 'Data vs time, Cumulative average on %d points' %N
+#axarr[1].set_title(title)
+#
+#N = 500
+#c1_smooth2 = calcSma(c1,N)
+##c1_smooth2 = np.asarray(c1_smooth2)
+#axarr[2].plot(t[:len(c1_smooth2)], c1_smooth2, 'x')
+#title = 'Data vs time, Simple moving average over %d points' %N
+#axarr[2].set_title(title)
+#
+#print 'data mean ', np.mean(c1),'relative stdev before is ',np.std(c1)/np.mean(c1), 'stdev cum avg is', np.std(c1_smooth)/np.mean(c1_smooth), 'and SMA stdev is ', np.std(c1_smooth2)/np.mean(c1_smooth2)
+N1 = 50
+N2 = 100
+x_cum, x_sma = smoothingPlot(t,c1,N1,N2)
+#%% Fourier Analysis
 y=c4
 xf,yf = makeFFT(y)
 #%% Split and look
@@ -205,6 +229,15 @@ plt.figure()
 plt.plot(xf2, yf2 )
 plt.title('FFT on subset of data')
 
+#%% Analysis on Translation data
+#from TDMS_handler import tempRun
+#tempRun()
+#path = '../Data/july14/translation1D/analysis/'
+#file = 'translationtest1_dynamic_1.csv'
+#f = np.genfromtxt(path+file,delimiter=',')
+#t,x,y,c1,c2,c3,c4 = zip(*f)
+#t,x,y,c1,c2,c3,c4 = np.array((t,x,y,c1,c2,c3,c4))
+#x_cum,x_sma = smoothingPlot(t,x,N1,N2)
 
 
 #%% Fit a Gaussian on the movement data
