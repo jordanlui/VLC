@@ -251,38 +251,72 @@ def score(tx,ty,px,py):
     sse = float(np.sqrt((tx-x)**2 + (ty-y)**2))
     return sse
 
+#%% Loop July 18
+
+# Pretend this is a real measurement
+# Take some signal readings
+Ax = np.array([0.139069522,	0.163966355,	0.132242335,	0.109172445]) # Signal measurement example
+C = np.array([912.9136038,	886.1007617,	949.4788229,	955.7781065]) # Calibration values
+m = 15.51406373 # Lambertian of source
+height = 805 # system height in mm
+scale_table = 4/3
+
+dist_pred = Ax ** (1/(m+3)) * C # Distance predictions in mm
+r = np.sqrt(np.abs(dist_pred ** 2 - height**2))  # lateral distances in mm. Warning: One value here is negative. very odd.
+
+c = [(436,456),(443,142),(106,451),(130,123)] # Known center positions of the transmitters (eyeball measured, inherent inaccuracy)
+r = [i*scale_table for i in r] # Distances in pixel distance units
+x_real = 218.6092677 # real position, in pixel units
+y_real = 230.2094592
+
+
+x=[]
+y=[]
+
+for i in range (0,len(r)):
+    c_temp = c[:i]+c[i+1:]
+    r_temp = r[:i]+r[i+1:]
+#    print len(r_temp)
+    x_new,y_new = trilateration(c_temp,r_temp)
+    x.append(x_new)
+    y.append(y_new)
+    print 'error in pixels is', np.sqrt( (x_new - x_real) **2 + (y_new - y_real) **2)
+print 'mean error diff in pixels is', np.sqrt( (np.mean(x) - x_real)**2 + (np.mean(y) - y_real)**2)
+
+
+#%% Old stuff
 # Main loop
 # Import our data to get started. 
-[x_train, x_test, t_train, t_test] = dataprep(x,seed,segment,twidth)
-
-# Better idea to use the x_train data as the source for our database. This will require some re-processing
-
-# Loop though a test set, evaluate accuracy for each one
-# Define empty error object
-error = []
-for i in range(0,20):
-
-    sampleindex = i
-    
-    # Extract our query value
-    query = x_test[sampleindex,:]
-    xreal = t_test[sampleindex,0]
-    yreal = t_test[sampleindex,1]
-    
-    # Find predicted value
-#    [xs, ys] = model_database(database,query)
-    [xs, ys] = fingerprint_trilat(database,query)
-
-    # Score our result. 
-    # Force a float because of some outputs that occur
-    error_single = score(xreal,yreal,xs,ys)
-#    print 'error is',score # This actual error score would be in inches
-#    print 'spatial error is',score*tableconversion, 'mm'
-    error.append(error_single)
-
-# Data analysis
-# Some method to average or quantify error through the whole test set
-errormeans = np.mean(error,axis=0)*tableconversion
-print 'Overal Error is ', errormeans,'mm'
-
-print 'end of analysis'
+#[x_train, x_test, t_train, t_test] = dataprep(x,seed,segment,twidth)
+#
+## Better idea to use the x_train data as the source for our database. This will require some re-processing
+#
+## Loop though a test set, evaluate accuracy for each one
+## Define empty error object
+#error = []
+#for i in range(0,20):
+#
+#    sampleindex = i
+#    
+#    # Extract our query value
+#    query = x_test[sampleindex,:]
+#    xreal = t_test[sampleindex,0]
+#    yreal = t_test[sampleindex,1]
+#    
+#    # Find predicted value
+##    [xs, ys] = model_database(database,query)
+#    [xs, ys] = fingerprint_trilat(database,query)
+#
+#    # Score our result. 
+#    # Force a float because of some outputs that occur
+#    error_single = score(xreal,yreal,xs,ys)
+##    print 'error is',score # This actual error score would be in inches
+##    print 'spatial error is',score*tableconversion, 'mm'
+#    error.append(error_single)
+#
+## Data analysis
+## Some method to average or quantify error through the whole test set
+#errormeans = np.mean(error,axis=0)*tableconversion
+#print 'Overal Error is ', errormeans,'mm'
+#
+#print 'end of analysis'

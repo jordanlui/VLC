@@ -79,36 +79,80 @@ def makeFFT(y):
     plt.show()
     return xf,yf
 
-def running_mean(x, N):
+def running_mean_old(x, N):
     cumsum = np.cumsum(np.insert(x, 0, 0)) 
     return (cumsum[N:] - cumsum[:-N]) / N 
+
+def running_mean(x, N):
+    if len(x.shape) > 1 : # Check if x is a vector or matrix. If matrix, x.shape should return a len 2 tuple
+        # If x is not just a vector we need to complete this column wise
+        newx = []
+        for i in range(0,x.shape[1]):
+            col = x[:,i]
+            cumsum = np.cumsum(np.insert(col, 0, 0)) 
+            col =  (cumsum[N:] - cumsum[:-N]) / N
+#            col = np.reshape(col, (len(col),1))
+#            newx = np.hstack((newx,col))
+            newx.append(col)
+        x = np.asarray(newx).transpose()
+    else:
+        cumsum = np.cumsum(np.insert(x, 0, 0)) 
+        x  = (cumsum[N:] - cumsum[:-N]) / N
+    return x
     
 def calcSma(data, smaPeriod):
-    j = next(i for i, x in enumerate(data) if x is not None)
-    our_range = range(len(data))[j + smaPeriod - 1:]
-#    empty_list = [None] * (j + smaPeriod - 1)
-    sub_result = [np.mean(data[i - smaPeriod + 1: i + 1]) for i in our_range]
+    # Simple Moving Average (SMA) calculation
+    # Built to accept vectors currently. Mod needed for matrices
+    # This SMA script appears to "eat from the front" of the dataset, as opposed to the end
+
+    if len(data.shape) > 1: # Check if we have a MxN matrix input
+#        print 'matrix input detected'
+        newx = []
+        x = data # save our matrix into new object
+        for i in range(0,data.shape[1]): # iterate through the columns
+            data = x[:,] # Grab the column
+            j = next(i for i, x in enumerate(data) if x is not None)
+            our_range = range(len(data))[j + smaPeriod - 1:]
+            sub_result = [np.mean(data[i - smaPeriod + 1: i + 1]) for i in our_range]
+            newx.append(sub_result) # Append result
+        sub_result = np.asarray(newx).transpose()
+        
+    else:
+
+        j = next(i for i, x in enumerate(data) if x is not None)
+        our_range = range(len(data))[j + smaPeriod - 1:]
+    #    empty_list = [None] * (j + smaPeriod - 1)
+        sub_result = [np.mean(data[i - smaPeriod + 1: i + 1]) for i in our_range]
 
     return np.array(sub_result)
+def SMA_orig(data, smaPeriod):
+    j = next(i for i, x in enumerate(data) if x is not None)
+    our_range = range(len(data))[j + smaPeriod - 1:]
+    empty_list = [None] * (j + smaPeriod - 1)
+    sub_result = [np.mean(data[i - smaPeriod + 1: i + 1]) for i in our_range]
 
+    return np.array(empty_list + sub_result)
+    return 0
 def smoothingPlot(t,x,N1=50,N2=50):
     # Smooth data and plot it for comparison
+    # Note the SMA "eats from the front" of the dataset
     f, axarr = plt.subplots(3, sharex = True)
     axarr[0].plot(t,x,'x')
     axarr[0].set_title('Data vs time, no smoothing')
     
-    
     # Try smoothing and compare
-#    N1 = 100 # Number of running average points
+    # Cumulative aka running mean
     x_cum = running_mean(x,N1)
-    axarr[1].plot(t[:len(x_cum)], x_cum, 'x')
+    ind_start = int((N1-1)/2)
+    ind_end = len(t) - (N1-ind_start) + 1
+#    print len(t), len(x_cum), ind_start, ind_end, len(t[ind_start:ind_end])
+    axarr[1].plot(t[ind_start:ind_end], x_cum, 'x') # Running average "eats data from both ends"
     title = 'Data vs time, Cumulative average on %d points' %N1
     axarr[1].set_title(title)
-    
-#    N2 = 500
+
+    # Smooth Moving Average
     x_sma = calcSma(x,N2)
-    #c1_smooth2 = np.asarray(c1_smooth2)
-    axarr[2].plot(t[:len(x_sma)], x_sma, 'x')
+    axarr[2].plot(t[N2-1:], x_sma, 'x') # Note how we reduce t value, since SMA "eats from front" of array
     title = 'Data vs time, Simple moving average over %d points' %N2
     axarr[2].set_title(title)
     

@@ -22,11 +22,12 @@ import os
 from sklearn import linear_model
 import matplotlib.pyplot as plt
 from dataprep import dataprep, unison_shuffled_copies
+from dataprep import makeFFT, running_mean, calcSma, smoothingPlot, stats
 
 
 # Constants and parameters
 path ='../Data/july14/corners2/analysis/' # Main working directory
-segment = 0.9 # Amount split for training
+#segment = 0.9 # Amount split for training. Not needed when we do LOOCV
 seed = 0 # Random seed value
 twidth = 2 # This is the number of label "t" columns in the front of the x-matrix
 scale_table = 1.333 # This is the scaling factor of table at 805mm sys height. Units are pixels/mm
@@ -77,23 +78,7 @@ def model(x_train,x_test,t_train,t_test):
     
     return error_mean, error_min, error_max, error_med
     
-def running_mean(x, N):
-    if x.shape[1] > 1 :
-        # If x is not just a vector we need to complete this column wise
-        newx = []
-        for i in range(0,x.shape[1]):
-            col = x[:,i]
-            cumsum = np.cumsum(np.insert(col, 0, 0)) 
-            col =  (cumsum[N:] - cumsum[:-N]) / N
-#            col = np.reshape(col, (len(col),1))
-#            newx = np.hstack((newx,col))
-            newx.append(col)
-        x = np.asarray(newx).transpose()
-        
-    else:
-        cumsum = np.cumsum(np.insert(x, 0, 0)) 
-        x  = (cumsum[N:] - cumsum[:-N]) / N
-    return x
+
 # Functions are in dataprep.py
 
 #%% Main Script
@@ -114,24 +99,29 @@ for i in range(0,numfiles): # Iterate through and generate train and test data
     otherpaths = filelist[:i] + filelist[i+1:] # Rest of paths
     
     x_test = np.genfromtxt(singlepath,delimiter=',') # The real x data
-    t_test = x_test[:,1:3]
-    x_test = x_test[:,3:]
+    time_test = x_test[:,0]     # Time data
+    t_test = x_test[:,1:3]      # coordinate data
+    x_test = x_test[:,3:]       # Channel power data
     
     # Try smoothing data
-    N = 250 # Smooth on x values. Smoothing on 50 points gives us 20 ms data
-    newx_test = running_mean(x_test,N) # 
-    t_test = t_test[N/2:len(x_test)-N/2+1] # Note a tweak for error handling may be required since running mean can give varying length output
-    x_test = newx_test
+    N1 = 50 # Smooth on x values. Smoothing on 50 points gives us 20 ms data
+#    N2 = 300
+#    newx_test = calcSma(x_test,N1)  # Smoothing on x data
+#    length_new = len(newx_test)     # Length of new x matrix. Confirm alignment
+#    time_test = time_test[N1-1:]  # Resize time vector. Note SMA "eats from start" of array
+#    t_test = t_test[N1-1:]        # Resize coordinates also
+#    smoothingPlot(time_test[1:500],newx_test[1:500,1],N1,N2) # Look at subset of data to see trending
+#    x_test = newx_test
     
     for apath in otherpaths:
         xtemp = np.genfromtxt(apath,delimiter=',')
         
         # Data smoothing on training data
-        xtemp_sigdata = xtemp[:,3:]                         # Grab signal data only
-        xtemp_sigdata = running_mean(xtemp_sigdata,N)       # Smooth signal data
-        xtemp = xtemp[N/2:len(xtemp)-N/2+1]                 # Resize array after smoothing
-        xtemp[:,3:] = xtemp_sigdata                         # Put back into array
-        
+#        xtemp_sigdata = xtemp[:,3:]                         # Grab signal data only
+#        xtemp_sigdata = calcSma(xtemp_sigdata,N1)       # Smooth signal data
+#        xtemp = xtemp[N1-1:,:]                 # Resize original array after smoothing
+#        xtemp[:,3:] = xtemp_sigdata                         # Put result back into array
+#        
         
         x_train.append(xtemp)
         
