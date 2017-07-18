@@ -19,7 +19,7 @@ from natsort import natsorted
 from scipy.optimize import curve_fit
 from scipy import asarray as ar,exp
 import scipy.fftpack
-
+from dataprep import makeFFT, running_mean, calcSma, smoothingPlot, stats
 
 
 
@@ -96,80 +96,7 @@ def loadFiles(filelist):
     with open(os.path.join(pathout,summaryfile),'wb') as file:
         np.savetxt(file,summary,fmt='%s',delimiter=',')
     return 0
-       
-def stats(f):
-    # Stats on data
-    # Current format: min,max,mean,stdev,stdev/mean
-    stats=[]
-    for i in range(0,f.shape[1]):
-        col = f[:,i]
-        
-        min = np.min(col)
-        max = np.max(col)
-        mean = np.mean(col)
-        stdev = np.std(col)
-        stdevrel = stdev/mean
-        print min,max,mean,stdev
-        stats.append(np.array((min,max,mean,stdev,stdevrel)))
-    stats = np.asarray(stats)
-    return stats
-def makeFFT(y):
-    # Make an FFT and plot
 
-    # Number of samplepoints
-    N = len(y)
-    # sample spacing - does this correspond to frequency at all?
-    T = 1.0 / 800.0
-#    x = np.linspace(0.0, N*T, N)
-    #y = np.sin(50.0 * 2.0*np.pi*x) + 0.5*np.sin(80.0 * 2.0*np.pi*x)
-    yf = scipy.fftpack.fft(y)
-    xf = np.linspace(0.0, 1.0/(2.0*T), N/2)
-    
-    fig, ax = plt.subplots()
-    ax.plot(xf, 10 * np.log10(2.0/N * np.abs(yf[:N//2])))
-    plt.title('FFT, y axis log scale')
-    plt.show()
-    return xf,yf
-
-def running_mean(x, N):
-    cumsum = np.cumsum(np.insert(x, 0, 0)) 
-    return (cumsum[N:] - cumsum[:-N]) / N 
-def smoothing_window(x,N):
-    # Performs simple moving window smoothing
-    return 0
-    
-def calcSma(data, smaPeriod):
-    j = next(i for i, x in enumerate(data) if x is not None)
-    our_range = range(len(data))[j + smaPeriod - 1:]
-    empty_list = [None] * (j + smaPeriod - 1)
-    sub_result = [np.mean(data[i - smaPeriod + 1: i + 1]) for i in our_range]
-
-    return np.array(sub_result)
-
-def smoothingPlot(t,x,N1=50,N2=50):
-    # Smooth data and plot it for comparison
-    f, axarr = plt.subplots(3, sharex = True)
-    axarr[0].plot(t,x,'x')
-    axarr[0].set_title('Data vs time, no smoothing')
-    
-    
-    # Try smoothing and compare
-#    N1 = 100 # Number of running average points
-    x_cum = running_mean(x,N1)
-    axarr[1].plot(t[:len(x_cum)], x_cum, 'x')
-    title = 'Data vs time, Cumulative average on %d points' %N1
-    axarr[1].set_title(title)
-    
-#    N2 = 500
-    x_sma = calcSma(x,N2)
-    #c1_smooth2 = np.asarray(c1_smooth2)
-    axarr[2].plot(t[:len(x_sma)], x_sma, 'x')
-    title = 'Data vs time, Simple moving average over %d points' %N2
-    axarr[2].set_title(title)
-    
-    print 'data mean ', np.mean(x),'relative stdev before is ',np.std(x)/np.mean(x), 'stdev cum avg is', np.std(x_cum)/np.mean(x_cum), 'and SMA stdev is ', np.std(x_sma)/np.mean(x_sma)
-    return x_cum, x_sma
-# Ended
         
 #%% Main
 
@@ -215,29 +142,26 @@ print 'max deviation from mean is', maxdev
 #axarr[2].set_title(title)
 #
 #print 'data mean ', np.mean(c1),'relative stdev before is ',np.std(c1)/np.mean(c1), 'stdev cum avg is', np.std(c1_smooth)/np.mean(c1_smooth), 'and SMA stdev is ', np.std(c1_smooth2)/np.mean(c1_smooth2)
-N1 = 50
-N2 = 100
-x_cum, x_sma = smoothingPlot(t,c1,N1,N2)
+N1 = 200
+N2 = 300
+#x_cum, x_sma = smoothingPlot(t,c1,N1,N2)
 #%% Fourier Analysis
-y=c4
-xf,yf = makeFFT(y)
-#%% Split and look
-xf2=xf[0:10]
-yf2=yf[0:10]
-N = len(y)
-plt.figure()
-plt.plot(xf2, yf2 )
-plt.title('FFT on subset of data')
+#y=c4
+#xf,yf = makeFFT(y)
+
 
 #%% Analysis on Translation data
 #from TDMS_handler import tempRun
 #tempRun()
-#path = '../Data/july14/translation1D/analysis/'
-#file = 'translationtest1_dynamic_1.csv'
-#f = np.genfromtxt(path+file,delimiter=',')
-#t,x,y,c1,c2,c3,c4 = zip(*f)
-#t,x,y,c1,c2,c3,c4 = np.array((t,x,y,c1,c2,c3,c4))
-#x_cum,x_sma = smoothingPlot(t,x,N1,N2)
+path = '../Data/july14/translation1D/analysis/'
+file = 'translationtest1_dynamic_1.csv'
+f = np.genfromtxt(path+file,delimiter=',')
+cutpoint = 28e3
+length = 5e3
+f =f[cutpoint:cutpoint+length,:]
+t,x,y,c1,c2,c3,c4 = zip(*f)
+t,x,y,c1,c2,c3,c4 = np.array((t,x,y,c1,c2,c3,c4))
+x_cum,x_sma = smoothingPlot(t,c1,N1,N2)
 
 
 #%% Fit a Gaussian on the movement data
