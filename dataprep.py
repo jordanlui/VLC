@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 #from scipy.optimize import curve_fit
 #from scipy import asarray as ar,exp
 import scipy.fftpack
+from scipy.interpolate import griddata
 
 def dataprep(x,seed,segment,twidth):
     # Takes our x matrix and shuffles, segments, and extracts label values
@@ -102,7 +103,7 @@ def running_mean(x, N):
     
 def calcSma(data, smaPeriod):
     # Simple Moving Average (SMA) calculation
-    # Built to accept vectors currently. Mod needed for matrices
+    # Built to accept vectors or matrices
     # This SMA script appears to "eat from the front" of the dataset, as opposed to the end
 
     if len(data.shape) > 1: # Check if we have a MxN matrix input
@@ -158,3 +159,33 @@ def smoothingPlot(t,x,N1=50,N2=50):
     
     print 'data mean ', np.mean(x),'relative stdev before is ',np.std(x)/np.mean(x), 'stdev cum avg is', np.std(x_cum)/np.mean(x_cum), 'and SMA stdev is ', np.std(x_sma)/np.mean(x_sma)
     return x_cum, x_sma
+def make_contour(x,y,z,interp_method='nearest',levels=5,boolplot=0,file='null'):
+    # Make contour plot from arrays of data. Not a lin space and interpolation is performed
+    fig = plt.figure()
+    #ax1 = fig.add_subplot(111,projection='3d')
+    
+    # Interpolation script based on the inputs
+    xmin = int(np.min(x))
+    xmax = int(np.max(x))
+    ymin = int(np.min(y))
+    ymax = int(np.max(y))
+    npts = len(x)
+    shift = 0 # Shift amount for the linspace
+    xi = np.linspace(xmin-shift, xmax+shift,100)
+    yi = np.linspace(ymin-shift, ymax+shift,100)
+    zi = griddata((x, y), z, (xi[None,:], yi[:,None]), method=interp_method)
+    # contour the gridded data, plotting dots at the randomly spaced data points.
+    plt.contour(xi,yi,zi,levels,linewidths=0.5,colors='k')
+    plt.contourf(xi,yi,zi,levels,cmap=plt.cm.jet)
+    title = 'contour ' + file[:-5] + ' ' + interp_method
+    plt.title(title)
+    
+    plt.colorbar() # draw colorbar
+    # plot data points.
+    if boolplot:
+        plt.scatter(x,y,marker='o',c='b',s=5)
+        plt.xlim(xmin,xmax)
+        plt.ylim(ymin,ymax)
+        title = title + ' Contour map (%d points)' % npts
+    plt.title(title)
+    return fig

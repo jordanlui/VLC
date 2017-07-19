@@ -255,8 +255,14 @@ def score(tx,ty,px,py):
 
 # Pretend this is a real measurement
 # Take some signal readings
+data = np.genfromtxt('../Data/july14/translation1D/translation_points.csv',delimiter=',',skip_header=1)
+coord_real = list(zip(data[:,0],data[:,1]))
+
 Ax = np.array([0.139069522,	0.163966355,	0.132242335,	0.109172445]) # Signal measurement example
-C = np.array([912.9136038,	886.1007617,	949.4788229,	955.7781065]) # Calibration values
+C = np.array([903.98,	887.5713965
+,	957.1150191
+,	967.0276052
+]) # Calibration values
 m = 15.51406373 # Lambertian of source
 height = 805 # system height in mm
 scale_table = 4/3
@@ -265,6 +271,7 @@ dist_pred = Ax ** (1/(m+3)) * C # Distance predictions in mm
 r = np.sqrt(np.abs(dist_pred ** 2 - height**2))  # lateral distances in mm. Warning: One value here is negative. very odd.
 
 c = [(436,456),(443,142),(106,451),(130,123)] # Known center positions of the transmitters (eyeball measured, inherent inaccuracy)
+c = [(425,400), (440,120), (37,404), (74,120)]
 r = [i*scale_table for i in r] # Distances in pixel distance units
 x_real = 218.6092677 # real position, in pixel units
 y_real = 230.2094592

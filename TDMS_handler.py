@@ -128,6 +128,7 @@ def runTDMS(dir_in,file):
 #    print os.path.join(dir_out,fileout)
 #    print 'Run TMDS File'
     f = tdmsfuncjun(path_in)
+    # Save result as CSV
     with open(os.path.join(dir_out,fileout),'wb') as file:
         np.savetxt(file,f,fmt='%s',delimiter=',')
 def tempRun():

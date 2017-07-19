@@ -35,25 +35,28 @@ import glob
 
 
 #%% Main
+dir_in = '../Data/july19/static/' # Main folder of our current study
+file = "static_6.tdms"
+dir_analysis = '../Data/july19/static/analysis/' # Location of analysis files
 #%% If running single files, use logic below
-#dir_in = '../Data/july19/static/'
-#file = "static_3.tdms"
-#path_in = dir_in + 'analysis/' + file[:-5] + '.csv'
-#if os.path.isfile(path_in):
-#    print 'file exists. Will not run TDMS Importer'
-#else:
-#    
-#    runTDMS(dir_in,file) # Run TDMS Import script
+
+path_in = dir_in + 'analysis/' + file[:-5] + '.csv'
+if os.path.isfile(path_in):
+    print 'file exists. Will not run TDMS Importer'
+else:
+    
+    runTDMS(dir_in,file) # Run TDMS Import script
+
 
 #%% Main
-dir_in = '../Data/july19/static/analysis/'
+
 
 interp_method = 'nearest' # Interpolation method used for griddata function
 boolplot = 0 # Flag for plotting contour points or not
 
 # Load data
 x_all=[]
-filelist = glob.glob(dir_in + '*.csv') # Generate file list
+filelist = glob.glob(dir_analysis + '*.csv') # Generate file list
 for file in filelist:
     
     x_all.append(np.genfromtxt(file,delimiter=','))
@@ -68,8 +71,8 @@ m = len(xx)
 #xx = xx[::250]
 
 # Normalize our power data
-maxpower = np.max(xx[:,3:])
-minpower = np.min(xx[:,3:])
+#maxpower = np.max(xx[:,3:])
+#minpower = np.min(xx[:,3:])
 #xx = normpower(xx)
 #xx[:,3:7] = np.round(xx[:,3:7],decimals=4)
 
@@ -82,10 +85,10 @@ c2 = xx[:,4]
 c3 = xx[:,5]
 c4 = xx[:,6]
 
-channel = c2 # A real dumb switching method. but effective for now
+channel = c4 # Choose the channel we analyze
 #channel = np.resize(channel,(len(channel),1))
 #%% Data treatment and smoothing
-# Change logic order since we should data smoothing on individual files
+#!! Change logic order since we should data smoothing on individual files !!#
 #N1 = 300
 #smooth_channel = calcSma(channel,N1)
 #smooth_x = x[N1-1:]
@@ -123,5 +126,5 @@ plt.title("Signal power with distance")
 make_contour(x,y,channel,interp_method=interp_method,levels=15,boolplot=boolplot,file=file)
 
 # Look at the smooth data
-make_contour(smooth_x,smooth_y,smooth_channel,interp_method=interp_method,levels=15,boolplot=boolplot,file=file)
+#make_contour(smooth_x,smooth_y,smooth_channel,interp_method=interp_method,levels=15,boolplot=boolplot,file=file)
 

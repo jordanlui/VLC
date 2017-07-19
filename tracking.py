@@ -62,7 +62,9 @@ fourcc = cv2.VideoWriter_fourcc(*'XVID')
 size = (640,480)
 video = cv2.VideoWriter('output.avi',fourcc, 30.0, size)
 # Define and Open coordinates text file
-text_file = open("OutputTest.txt", "w")
+filepath = "C:\labview\OutputTest.txt"
+text_file = open(filepath, "w")
+# text_file = open("OutputTest.txt", "w")
 text_file.close()
 
 
@@ -73,7 +75,7 @@ while True:
 	
 	# grab the current frame
 	(grabbed, frame) = camera.read()
-	text_file = open("OutputTest.txt", "a")
+	text_file = open(filepath, "a")
 
 	# if we are viewing a video and we did not grab a frame,
 	# then we have reached the end of the video

@@ -33,6 +33,7 @@ filelist = natsorted(filelist) # Sort in logical order to make thinking easier
 # Functions
 def fitGaussian(x,y):
     # Some preformatting based on the current july 14 input data
+    # Fitting a 1d Gaussian
     x = np.array(map(float,x))
     y = np.array(y)
 
