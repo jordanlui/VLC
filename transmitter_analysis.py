@@ -85,7 +85,7 @@ c2 = xx[:,4]
 c3 = xx[:,5]
 c4 = xx[:,6]
 
-channel = c4 # Choose the channel we analyze
+channel = c1 # Choose the channel we analyze
 #channel = np.resize(channel,(len(channel),1))
 #%% Data treatment and smoothing
 #!! Change logic order since we should data smoothing on individual files !!#
@@ -127,4 +127,3 @@ make_contour(x,y,channel,interp_method=interp_method,levels=15,boolplot=boolplot
 
 # Look at the smooth data
 #make_contour(smooth_x,smooth_y,smooth_channel,interp_method=interp_method,levels=15,boolplot=boolplot,file=file)
-

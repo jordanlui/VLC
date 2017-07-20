@@ -250,45 +250,73 @@ def score(tx,ty,px,py):
     y = py
     sse = float(np.sqrt((tx-x)**2 + (ty-y)**2))
     return sse
+def getC(x,y,Ax,h,m,xc,yc,scale):
+    # Calculate Calibration C value from distance and power reading 
+    dxy = np.sqrt( (xc - x)**2 + (yc - y)**2 ) # Horizontal distance in pixels
+    dxy_mm = dxy / scale # Horizontal distance, mm
+    d = np.sqrt(dxy_mm**2 + h**2) # Hypotenuse distance, in mm
+    C = d / Ax ** (1/(m+3))
+    
+    return C
+
+#%% Testing July 20
+m = 15.51406373 # Calculated Lambertian of LED
+h = 805 # System height, mm
+scale = 4/3 # Pixels / mm
+xc = 425
+yc = 400
+#x = 218.61
+#y = 230.21
+Ax = 0.139069522
+
+f = np.genfromtxt('../Data/july14/translation1D/translation_points.csv',delimiter=',',skip_header=1)
+
+C = []
+for i in range(0,len(f)):
+    x,y = f[i,0:2]
+    Ax = f[i,2] # This is channel 1 data
+    newC = getC(x,y,Ax,h,m,xc,yc,scale)
+    C.append(newC)
+print np.mean(C)
 
 #%% Loop July 18
 
 # Pretend this is a real measurement
 # Take some signal readings
-data = np.genfromtxt('../Data/july14/translation1D/translation_points.csv',delimiter=',',skip_header=1)
-coord_real = list(zip(data[:,0],data[:,1]))
-
-Ax = np.array([0.139069522,	0.163966355,	0.132242335,	0.109172445]) # Signal measurement example
-C = np.array([903.98,	887.5713965
-,	957.1150191
-,	967.0276052
-]) # Calibration values
-m = 15.51406373 # Lambertian of source
-height = 805 # system height in mm
-scale_table = 4/3
-
-dist_pred = Ax ** (1/(m+3)) * C # Distance predictions in mm
-r = np.sqrt(np.abs(dist_pred ** 2 - height**2))  # lateral distances in mm. Warning: One value here is negative. very odd.
-
-c = [(436,456),(443,142),(106,451),(130,123)] # Known center positions of the transmitters (eyeball measured, inherent inaccuracy)
-c = [(425,400), (440,120), (37,404), (74,120)]
-r = [i*scale_table for i in r] # Distances in pixel distance units
-x_real = 218.6092677 # real position, in pixel units
-y_real = 230.2094592
-
-
-x=[]
-y=[]
-
-for i in range (0,len(r)):
-    c_temp = c[:i]+c[i+1:]
-    r_temp = r[:i]+r[i+1:]
-#    print len(r_temp)
-    x_new,y_new = trilateration(c_temp,r_temp)
-    x.append(x_new)
-    y.append(y_new)
-    print 'error in pixels is', np.sqrt( (x_new - x_real) **2 + (y_new - y_real) **2)
-print 'mean error diff in pixels is', np.sqrt( (np.mean(x) - x_real)**2 + (np.mean(y) - y_real)**2)
+#data = np.genfromtxt('../Data/july14/translation1D/translation_points.csv',delimiter=',',skip_header=1)
+#coord_real = list(zip(data[:,0],data[:,1]))
+#
+#Ax = np.array([0.139069522,	0.163966355,	0.132242335,	0.109172445]) # Signal measurement example
+#C = np.array([903.98,	887.5713965
+#,	957.1150191
+#,	967.0276052
+#]) # Calibration values
+#m = 15.51406373 # Lambertian of source
+#height = 805 # system height in mm
+#scale_table = 4/3
+#
+#dist_pred = Ax ** (1/(m+3)) * C # Distance predictions in mm
+#r = np.sqrt(np.abs(dist_pred ** 2 - height**2))  # lateral distances in mm. Warning: One value here is negative. very odd.
+#
+#c = [(436,456),(443,142),(106,451),(130,123)] # Known center positions of the transmitters (eyeball measured, inherent inaccuracy)
+#c = [(425,400), (440,120), (37,404), (74,120)]
+#r = [i*scale_table for i in r] # Distances in pixel distance units
+#x_real = 218.6092677 # real position, in pixel units
+#y_real = 230.2094592
+#
+#
+#x=[]
+#y=[]
+#
+#for i in range (0,len(r)):
+#    c_temp = c[:i]+c[i+1:]
+#    r_temp = r[:i]+r[i+1:]
+##    print len(r_temp)
+#    x_new,y_new = trilateration(c_temp,r_temp)
+#    x.append(x_new)
+#    y.append(y_new)
+#    print 'error in pixels is', np.sqrt( (x_new - x_real) **2 + (y_new - y_real) **2)
+#print 'mean error diff in pixels is', np.sqrt( (np.mean(x) - x_real)**2 + (np.mean(y) - y_real)**2)
 
 
 #%% Old stuff
