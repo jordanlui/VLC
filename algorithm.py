@@ -23,9 +23,10 @@ print 'Start of script'
 # Libraries
 import numpy as np
 import os, random
-from dataprep import dataprep
+from dataprep import dataprep, make_contour, calcSma
 import glob
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 #from trilateration import trilateration # This is a tr
 
@@ -308,15 +309,18 @@ files_testing = filelist[-2:]
 
 
 #%% Test C Values
-testdata = np.genfromtxt(files_testing[1],delimiter=',',skip_header=1)
+testfile = files_testing[0]
+testdata = np.genfromtxt(testfile,delimiter=',',skip_header=1)
 #testdata = testdata[0:5e3,:] # Just test a subset of data for now
 C = [9.278584399337349851e+02,
 9.214980966032483138e+02,
 9.440759924768719884e+02,
 9.383647688823430144e+02]
+xmax = 640
+ymax = 480
 
 
-error = []
+error = [] # Storing all error values as we proceed. Units: pixels
 coord_pred = [] # Coordinate predictions that we store for each row
 for row in testdata:
     x_real,y_real = row[1:3] # Grab real coordinate values
@@ -327,27 +331,27 @@ for row in testdata:
 #    error = []
     x_pred = []
     y_pred = []
-    for i in range(0,numchannels):
+    for i in range(0,numchannels): # Iterate through all permutations for trilaterations
         r = list(dxy[:i]) + list(dxy[i+1:])
         c = list(center_coord[:i] + center_coord[i+1:])
         x_temp,y_temp = trilateration(c,r) # Trilaterate on 3 points
-#        print x_pred
         x_pred.append(x_temp)
         y_pred.append(y_temp)
     x_pred_mean = np.mean(x_pred)
     y_pred_mean = np.mean(y_pred)
-    coord_pred.append((x_pred_mean, y_pred_mean))
-    error_single = np.sqrt( (x_pred_mean - x_real)**2 + (y_pred_mean - y_real)**2)
-    error.append(error_single)
+    if y_pred_mean < ymax and x_pred_mean < xmax: # Ensure that predictions are legal pixel values
+        coord_pred.append((x_pred_mean, y_pred_mean))
+        error_single = np.sqrt( (x_pred_mean - x_real)**2 + (y_pred_mean - y_real)**2)
+        error.append(error_single)
     
-error[:] = [x / scale for x in error ]# Convert error to mm
+error_mm = [row / scale for row in error ]# Convert error to mm
 #    print 'Summary: actual coordinates %.2f,%.2f. Prediction %.2f,%.2f. Error %.2f.' %(x_real,y_real,x_pred_mean,y_pred_mean,error_single)
-print 'Summary: Mean error in mm is %.2f, min is %.2f, and max is %.2f' % (np.mean(error), np.min(error), np.max(error))
+print 'Summary: Mean error in mm is %.2f, min is %.2f, and max is %.2f' % (np.mean(error_mm), np.min(error_mm), np.max(error_mm))
 
 
 # Histogram of results
 plt.figure()
-plt.hist(error,bins='auto')
+plt.hist(error_mm,bins='auto')
 title = 'Histogram of error (mm)'
 plt.title(title)
 plt.ylabel('Occurrences')
@@ -355,45 +359,12 @@ plt.xlabel('Error value (mm)')
 plt.show()
 
 #%% Try to plot where the error occurs
-plt.figure()
-
-
-
-#%% Loop July 18
-
-# Pretend this is a real measurement
-# Take some signal readings
-#data = np.genfromtxt('../Data/july14/translation1D/translation_points.csv',delimiter=',',skip_header=1)
-#coord_real = list(zip(data[:,0],data[:,1]))
-#
-#Ax = np.array([0.139069522,	0.163966355,	0.132242335,	0.109172445]) # Signal measurement example
-#C = np.array([903.98,	887.5713965
-#,	957.1150191
-#,	967.0276052
-#]) # Calibration values
-#m = 15.51406373 # Lambertian of source
-#height = 805 # system height in mm
-#scale_table = 4/3
-#
-#dist_pred = Ax ** (1/(m+3)) * C # Distance predictions in mm
-#r = np.sqrt(np.abs(dist_pred ** 2 - height**2))  # lateral distances in mm. Warning: One value here is negative. very odd.
-#
-#c = [(436,456),(443,142),(106,451),(130,123)] # Known center positions of the transmitters (eyeball measured, inherent inaccuracy)
-#c = [(425,400), (440,120), (37,404), (74,120)]
-#r = [i*scale_table for i in r] # Distances in pixel distance units
-#x_real = 218.6092677 # real position, in pixel units
-#y_real = 230.2094592
-#
-#
-#x=[]
-#y=[]
-#
-#for i in range (0,len(r)):
-#    c_temp = c[:i]+c[i+1:]
-#    r_temp = r[:i]+r[i+1:]
-##    print len(r_temp)
-#    x_new,y_new = trilateration(c_temp,r_temp)
-#    x.append(x_new)
-#    y.append(y_new)
-#    print 'error in pixels is', np.sqrt( (x_new - x_real) **2 + (y_new - y_real) **2)
-#print 'mean error diff in pixels is', np.sqrt( (np.mean(x) - x_real)**2 + (np.mean(y) - y_real)**2)
+interp_method = 'nearest'
+boolplot = 0
+x = testdata[:,1]
+y = testdata[:,2]
+error_mm = np.array(error_mm)
+#error_mm = np.reshape(error_mm,(len(error_mm),1))
+#x = np.reshape(x,(len(x),1))
+#y = np.reshape(y,(len(y),1))
+make_contour(x,y,error_mm,interp_method=interp_method,levels=10,boolplot=boolplot,file=testfile)
