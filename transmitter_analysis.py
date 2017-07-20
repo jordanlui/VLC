@@ -36,7 +36,7 @@ import glob
 
 #%% Main
 dir_in = '../Data/july19/static/' # Main folder of our current study
-file = "static_6.tdms"
+file = "static_9.tdms"
 dir_analysis = '../Data/july19/static/analysis/' # Location of analysis files
 #%% If running single files, use logic below
 

@@ -24,6 +24,8 @@ print 'Start of script'
 import numpy as np
 import os, random
 from dataprep import dataprep
+import glob
+import matplotlib.pyplot as plt
 
 #from trilateration import trilateration # This is a tr
 
@@ -104,7 +106,9 @@ def max_in_list(column):
     
 def trilateration(c,r):
     # Trilateration based on 3 coordinates in c and 3 radii in r
-    # C input should be a list
+    # C input should be a tuple list of coordinates
+    # Inputs should be all in equal dimensions (ideal pixel units)
+
 #    if len(c) != 3 or len(r) != 3:
 #        print 'Improper input.. 3 element list of coordinates expected for c'
 #        break
@@ -263,21 +267,97 @@ def getC(x,y,Ax,h,m,xc,yc,scale):
 m = 15.51406373 # Calculated Lambertian of LED
 h = 805 # System height, mm
 scale = 4/3 # Pixels / mm
-xc = 425
-yc = 400
-#x = 218.61
-#y = 230.21
-Ax = 0.139069522
+numchannels = 4
 
-f = np.genfromtxt('../Data/july14/translation1D/translation_points.csv',delimiter=',',skip_header=1)
+center_coord = [ [425,400], [440,120], [37,404], [74,120]]
 
-C = []
-for i in range(0,len(f)):
-    x,y = f[i,0:2]
-    Ax = f[i,2] # This is channel 1 data
-    newC = getC(x,y,Ax,h,m,xc,yc,scale)
-    C.append(newC)
-print np.mean(C)
+
+# Import Data
+#f = np.genfromtxt('../Data/july14/translation1D/translation_points.csv',delimiter=',',skip_header=1)
+path = '../Data/july19/static/analysis/'
+filelist = glob.glob(path + '*.csv')
+files_training = filelist[0:-2]
+files_testing = filelist[-2:]
+
+#C_perfile = []
+#for file in files_training:
+#    print file
+#    f = np.genfromtxt(file,delimiter=',',skip_header=1)
+#    
+#    
+#    C_values = []
+#    C_all = []
+#    for channel in range(0,numchannels):
+#        C = []
+#        xc,yc = center_coord[channel]
+#        for i in range(0,len(f)):
+#            x,y = f[i,1:3] # Grab coordinate
+#            Ax = f[i,channel+3] # Grab signal data
+#            newC = getC(x,y,Ax,h,m,xc,yc,scale) # calculate that C value
+#            C.append(newC)
+#        C_all.append(C)
+#        print 'mean C value is',np.mean(C)
+#        C_values.append(np.mean(C))
+#    C_perfile.append(C_values)
+#
+#C_summary = np.asarray(C_perfile).transpose()
+#C_mean = np.mean(C_summary,axis=1)
+#C_std = np.std(C_summary,axis=1)
+#
+#C = C_mean # Assign the values to C
+
+
+#%% Test C Values
+testdata = np.genfromtxt(files_testing[1],delimiter=',',skip_header=1)
+#testdata = testdata[0:5e3,:] # Just test a subset of data for now
+C = [9.278584399337349851e+02,
+9.214980966032483138e+02,
+9.440759924768719884e+02,
+9.383647688823430144e+02]
+
+
+error = []
+coord_pred = [] # Coordinate predictions that we store for each row
+for row in testdata:
+    x_real,y_real = row[1:3] # Grab real coordinate values
+    Ax = row[3:] # Grab signal data
+    d =  Ax**(1/(m+3)) * C # Distance calculations, in mm
+    dxy = np.sqrt((d**2 - h**2)) * scale # Lateral distance, converted to pixel distance units
+    
+#    error = []
+    x_pred = []
+    y_pred = []
+    for i in range(0,numchannels):
+        r = list(dxy[:i]) + list(dxy[i+1:])
+        c = list(center_coord[:i] + center_coord[i+1:])
+        x_temp,y_temp = trilateration(c,r) # Trilaterate on 3 points
+#        print x_pred
+        x_pred.append(x_temp)
+        y_pred.append(y_temp)
+    x_pred_mean = np.mean(x_pred)
+    y_pred_mean = np.mean(y_pred)
+    coord_pred.append((x_pred_mean, y_pred_mean))
+    error_single = np.sqrt( (x_pred_mean - x_real)**2 + (y_pred_mean - y_real)**2)
+    error.append(error_single)
+    
+error[:] = [x / scale for x in error ]# Convert error to mm
+#    print 'Summary: actual coordinates %.2f,%.2f. Prediction %.2f,%.2f. Error %.2f.' %(x_real,y_real,x_pred_mean,y_pred_mean,error_single)
+print 'Summary: Mean error in mm is %.2f, min is %.2f, and max is %.2f' % (np.mean(error), np.min(error), np.max(error))
+
+
+# Histogram of results
+plt.figure()
+plt.hist(error,bins='auto')
+title = 'Histogram of error (mm)'
+plt.title(title)
+plt.ylabel('Occurrences')
+plt.xlabel('Error value (mm)')
+plt.show()
+
+#%% Try to plot where the error occurs
+plt.figure()
+
+
 
 #%% Loop July 18
 
@@ -317,41 +397,3 @@ print np.mean(C)
 #    y.append(y_new)
 #    print 'error in pixels is', np.sqrt( (x_new - x_real) **2 + (y_new - y_real) **2)
 #print 'mean error diff in pixels is', np.sqrt( (np.mean(x) - x_real)**2 + (np.mean(y) - y_real)**2)
-
-
-#%% Old stuff
-# Main loop
-# Import our data to get started. 
-#[x_train, x_test, t_train, t_test] = dataprep(x,seed,segment,twidth)
-#
-## Better idea to use the x_train data as the source for our database. This will require some re-processing
-#
-## Loop though a test set, evaluate accuracy for each one
-## Define empty error object
-#error = []
-#for i in range(0,20):
-#
-#    sampleindex = i
-#    
-#    # Extract our query value
-#    query = x_test[sampleindex,:]
-#    xreal = t_test[sampleindex,0]
-#    yreal = t_test[sampleindex,1]
-#    
-#    # Find predicted value
-##    [xs, ys] = model_database(database,query)
-#    [xs, ys] = fingerprint_trilat(database,query)
-#
-#    # Score our result. 
-#    # Force a float because of some outputs that occur
-#    error_single = score(xreal,yreal,xs,ys)
-##    print 'error is',score # This actual error score would be in inches
-##    print 'spatial error is',score*tableconversion, 'mm'
-#    error.append(error_single)
-#
-## Data analysis
-## Some method to average or quantify error through the whole test set
-#errormeans = np.mean(error,axis=0)*tableconversion
-#print 'Overal Error is ', errormeans,'mm'
-#
-#print 'end of analysis'
