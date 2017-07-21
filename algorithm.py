@@ -337,8 +337,17 @@ for row in testdata:
         x_temp,y_temp = trilateration(c,r) # Trilaterate on 3 points
         x_pred.append(x_temp)
         y_pred.append(y_temp)
+        
+    # Pick the new coordinate based on the 4 predictions.
+        
+    # Method 1. Take the mean
     x_pred_mean = np.mean(x_pred)
     y_pred_mean = np.mean(y_pred)
+    
+    # Method 2: Reject the one that is farthest from mean
+#    diff_x = ((np.abs(x_pred_mean - x_pred)))
+#    diff_y = np.abs(y_pred_mean - y_pred)
+    
     if y_pred_mean < ymax and x_pred_mean < xmax: # Ensure that predictions are legal pixel values
         coord_pred.append((x_pred_mean, y_pred_mean))
         error_single = np.sqrt( (x_pred_mean - x_real)**2 + (y_pred_mean - y_real)**2)
@@ -348,7 +357,7 @@ error_mm = [row / scale for row in error ]# Convert error to mm
 #    print 'Summary: actual coordinates %.2f,%.2f. Prediction %.2f,%.2f. Error %.2f.' %(x_real,y_real,x_pred_mean,y_pred_mean,error_single)
 print 'Summary: Mean error in mm is %.2f, min is %.2f, and max is %.2f' % (np.mean(error_mm), np.min(error_mm), np.max(error_mm))
 
-
+#%% Analysis of results
 # Histogram of results
 plt.figure()
 plt.hist(error_mm,bins='auto')
@@ -358,7 +367,7 @@ plt.ylabel('Occurrences')
 plt.xlabel('Error value (mm)')
 plt.show()
 
-#%% Try to plot where the error occurs
+#%% Contour plot on error
 interp_method = 'nearest'
 boolplot = 0
 x = testdata[:,1]
@@ -368,3 +377,11 @@ error_mm = np.array(error_mm)
 #x = np.reshape(x,(len(x),1))
 #y = np.reshape(y,(len(y),1))
 make_contour(x,y,error_mm,interp_method=interp_method,levels=10,boolplot=boolplot,file=testfile)
+
+#%% Error location
+plt.figure()
+plt.plot(x,error_mm)
+plt.figure()
+plt.plot(y,error_mm)
+
+

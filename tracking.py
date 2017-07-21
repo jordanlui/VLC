@@ -156,7 +156,8 @@ while True:
 	video.write(frame)
 
 	text_file.close()
-	time.sleep(0.07725)
+	time.sleep(0.07725) # Original sleep time
+	# time.sleep(0.02)
 	
 	# if the 'q' key is pressed, stop the loop
 	if key == ord("q"):
