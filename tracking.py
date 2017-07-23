@@ -30,20 +30,13 @@ radius_min = 4 # Minimum radius size of tracking circle to consider an object
 # list of tracked points
 
 # HSV Values for table covered with white poster, LED Lighting. 20170710
-greenLower = (25,108,15)
-greenUpper = (65,255,57)
+# greenLower = (25,108,15)
+# greenUpper = (65,255,57)
 
-# HSV Values for green bottle cap. Optimized for the lamp lighting
-# greenLower = (38,70,61)
-# greenUpper = (112,250,217)
+# Values for Red tracker at home, daytime, july 22
+greenLower = (0, 200, 101)
+greenUpper = (21, 253, 177)
 
-# HSV Values for table covered with white poster. 20170627
-# greenLower = (49,80,30)
-# greenUpper = (107,255,94)
-
-# Bounds for the unlit table are below, but will be less accurate
-# greenLower = (66,91,23)	
-# greenUpper = (121,211,169)	
 pts = deque(maxlen=args["buffer"])
 #Green Egg Works better than the Pink one
 

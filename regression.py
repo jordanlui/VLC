@@ -23,10 +23,10 @@ from sklearn import linear_model
 import matplotlib.pyplot as plt
 from dataprep import dataprep, unison_shuffled_copies
 from dataprep import makeFFT, running_mean, calcSma, smoothingPlot, stats
-
+import glob
 
 # Constants and parameters
-path ='../Data/july14/corners2/analysis/' # Main working directory
+path ='../Data/july19/static/analysis/' # Main working directory
 #segment = 0.9 # Amount split for training. Not needed when we do LOOCV
 seed = 0 # Random seed value
 twidth = 2 # This is the number of label "t" columns in the front of the x-matrix
@@ -58,7 +58,7 @@ def model(x_train,x_test,t_train,t_test):
     diff = (x_pred - t_test)**2 # Square errors
     diff = np.sqrt(np.sum(diff,axis=1)) # Sum the square error and sqrt. Euclidean distance error
     error_mean = np.mean(diff) # Per pixel error mean
-    error_mean = error_mean/scale_table # Error in mm
+    error_mean = error_mean/scale_table # Mean Error in mm
     print 'mean error is',error_mean,'mm'
     diff_mm = diff/scale_table # This is the mm error values
     error_min = np.min(diff_mm)
@@ -104,8 +104,8 @@ for i in range(0,numfiles): # Iterate through and generate train and test data
     x_test = x_test[:,3:]       # Channel power data
     
     # Try smoothing data
-    N1 = 50 # Smooth on x values. Smoothing on 50 points gives us 20 ms data
-#    N2 = 300
+    N1 = 300 # Smooth on x values. Smoothing on 50 points gives us 20 ms data
+    N2 = 300
 #    newx_test = calcSma(x_test,N1)  # Smoothing on x data
 #    length_new = len(newx_test)     # Length of new x matrix. Confirm alignment
 #    time_test = time_test[N1-1:]  # Resize time vector. Note SMA "eats from start" of array
