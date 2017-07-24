@@ -26,19 +26,25 @@ from dataprep import make_contour, calcSma
 import glob
 
 
+#%% Main & Import tasks
+dir_tdms = '../Data/july24/'
+
+tdmsfiles = glob.glob(dir_tdms + '*.tdms')
+for file in tdmsfiles:
+    
+#    os.path.basename(tdmsfiles[0])
+    runTDMS(dir_in,os.path.basename(file))
 #%% Main
-dir_in = '../Data/july19/static/analysis/'
-
 interp_method = 'nearest' # Interpolation method used for griddata function
-boolplot = 1 # Flag for plotting contour points or not
-
+boolplot = 0 # Flag for plotting contour points or not
+dir_in = '../Data/july24/analysis/'
 # Load data
 x_all=[]
 filelist = glob.glob(dir_in + '*.csv') # Generate file list
-filelist = filelist[:4]
-for file in filelist:
+#file = filelist[5]
+#for file in filelist:
     
-    x_all.append(np.genfromtxt(file,delimiter=','))
+x_all.append(np.genfromtxt(filelist[-1],delimiter=','))
 # Combine with others
 xx = np.vstack(x_all)
 m = len(xx)
@@ -64,7 +70,7 @@ c2 = xx[:,4]
 c3 = xx[:,5]
 c4 = xx[:,6]
 
-channel = c2 # A real dumb switching method. but effective for now
+channel = c1 # A real dumb switching method. but effective for now
 #channel = np.resize(channel,(len(channel),1))
 #%% Data treatment and smoothing
 # Change logic order since we should data smoothing on individual files
@@ -105,5 +111,5 @@ plt.title("Signal power with distance")
 make_contour(x,y,channel,interp_method=interp_method,levels=15,boolplot=boolplot,file=file)
 
 # Look at the smooth data
-make_contour(smooth_x,smooth_y,smooth_channel,interp_method=interp_method,levels=15,boolplot=boolplot,file=file)
+#make_contour(smooth_x,smooth_y,smooth_channel,interp_method=interp_method,levels=15,boolplot=boolplot,file=file)
 

@@ -33,9 +33,13 @@ radius_min = 4 # Minimum radius size of tracking circle to consider an object
 # greenLower = (25,108,15)
 # greenUpper = (65,255,57)
 
+# HSV for ambient fluorescent lighting on yellow breadboard
+greenLower = (6,95,97)
+greenUpper = (26,255,174)
+
 # Values for Red tracker at home, daytime, july 22
-greenLower = (0, 200, 101)
-greenUpper = (21, 253, 177)
+# greenLower = (0, 200, 101)
+# greenUpper = (21, 253, 177)
 
 pts = deque(maxlen=args["buffer"])
 #Green Egg Works better than the Pink one
